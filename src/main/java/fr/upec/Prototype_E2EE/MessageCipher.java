@@ -1,6 +1,6 @@
 package fr.upec.Prototype_E2EE;
 
-public class Cipher {
+public class MessageCipher {
     public static String encrypt() {
         //Encrypt with AES(256) + GCM, return as Base64
     }
