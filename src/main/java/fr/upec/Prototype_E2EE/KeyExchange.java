@@ -126,7 +126,7 @@ public class KeyExchange {
     /**
      * Handle the message 1 received from other
      *
-     * @param message1 Message 1 received from other
+     * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
      * @throws NoSuchAlgorithmException
      * @throws IOException
@@ -134,46 +134,54 @@ public class KeyExchange {
      * @throws InvalidAlgorithmParameterException
      * @throws InvalidKeyException
      */
-    public static SecretBuild handleMessage1(String message1) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
-        Message1 otherMessage = new Gson().fromJson(message1, Message1.class);
+    public static SecretBuild handleMessage1(String otherMessage1) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+        Message1 otherMessage = new Gson().fromJson(otherMessage1, Message1.class);
+
         int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
         String myPubKey = ""; //Need to retrieve my pub key
         PrivateKey myPrivKey = ""; //Same as pub key
         PublicKey otherPubKey = Tools.getPublicKey(otherMessage.getPubKey());
         String symKey = Tools.toBase64(createSharedKey(otherPubKey, myPrivKey).getEncoded());
-        return new SecretBuild((System.currentTimeMillis() / 1000L), otherMessage.getTimestamp(), myNonce, otherMessage.getNonce(), myPubKey, otherMessage.getPubKey(), symKey);
+
+        return new SecretBuild((System.currentTimeMillis() / 1000L),
+                otherMessage.getTimestamp(),
+                myNonce,
+                otherMessage.getNonce(),
+                myPubKey,
+                otherMessage.getPubKey(),
+                symKey);
     }
 
     /**
-     * Create message 2 (WIP)
+     * Create message 2 by signing then ciphering
      *
-     * @param myDate
-     * @param otherDate
-     * @param myNonce
-     * @param otherNonce
-     * @param myPubKey
-     * @param otherPubKey
-     * @param symKey
-     * @return
-     */
-    public static String createMessage2(long myDate, long otherDate, int myNonce, int otherNonce, String myPubKey, String otherPubKey, String symKey) {
-        Gson gson = new GsonBuilder().create();
-        gson.toJson(new SecretBuild(myDate, otherDate, myNonce, otherNonce, myPubKey, otherPubKey, symKey));
-        return Tools.toBase64(gson.toString());
-    }
-
-    /**
-     * Compare the shared key if is the same (WIP)
-     *
-     * @param sharedKey
-     * @param publicKeyOther
-     * @param privateKey
-     * @return
+     * @param privateKey  Your Private Key
+     * @param secretBuild Your SecretBuild
+     * @return Return the signed and ciphered message 2 as Base64
+     * @throws InvalidAlgorithmParameterException
+     * @throws SignatureException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
-     * @throws InvalidAlgorithmParameterException
      */
-    public static boolean compareSharedKeys(Key sharedKey, PublicKey publicKeyOther, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
-        return sharedKey.equals(createSharedKey(publicKeyOther, privateKey));
+    public static String createMessage2(PrivateKey privateKey, SecretBuild secretBuild) throws InvalidAlgorithmParameterException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+        Gson gson = new GsonBuilder().create();
+        String message2 = Tools.toJSON(secretBuild);
+
+        //Need to have an ID verification in Android
+        byte[] signedMessage = Sign.sign(privateKey, message2);
+        byte[] cipheredSignedMessage = MessageCipher.cipher(signedMessage);
+
+        return Tools.toBase64(cipheredSignedMessage);
+    }
+
+    public static Boolean handleMessage2(String otherMessage2, SecretBuild secretBuild) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, SignatureException, InvalidKeyException {
+        SecretBuild otherSecretBuild = new SecretBuild(secretBuild);
+        String otherSecretBuildJSON = Tools.toJSON(otherSecretBuild);
+        String otherSecretBuildBase64 = Tools.toBase64(otherSecretBuildJSON);
+
+        byte[] cipheredSignedOtherMessage2 = Tools.toBytes(otherMessage2);
+        byte[] signedMessage = MessageCipher.decipher(cipheredSignedOtherMessage2);
+
+        return Sign.verify(Tools.toPublicKey(secretBuild.getOtherPubKey()), signedMessage, otherSecretBuildBase64);
     }
 }

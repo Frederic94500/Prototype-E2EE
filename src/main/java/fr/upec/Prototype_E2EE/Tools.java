@@ -1,5 +1,8 @@
 package fr.upec.Prototype_E2EE;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -55,5 +58,18 @@ public class Tools {
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pubBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("DSA");
         return keyFactory.generatePublic(x509EncodedKeySpec);
+    }
+
+    public static String toJSON(Object o) {
+        Gson gson = new GsonBuilder().create();
+        return gson.toJson(o);
+    }
+
+    public static PublicKey toPublicKey(byte[] bytesPubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(bytesPubKey));
+    }
+
+    public static PublicKey toPublicKey(String base64PubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        return toPublicKey(toBytes(base64PubKey));
     }
 }

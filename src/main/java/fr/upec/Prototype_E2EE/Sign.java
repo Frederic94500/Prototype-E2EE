@@ -19,7 +19,7 @@ public class Sign {
      * @throws InvalidKeyException
      * @throws InvalidAlgorithmParameterException
      */
-    public static String sign(PrivateKey privateKey, String message) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public static byte[] sign(PrivateKey privateKey, String message) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
         Signature signature = Signature.getInstance("SHA512withECDSA");
         signature.setParameter(new ECGenParameterSpec("secp256k1"));
         signature.initSign(privateKey);
@@ -27,7 +27,7 @@ public class Sign {
         byte[] messageByte = message.getBytes(StandardCharsets.UTF_8);
         signature.update(messageByte);
 
-        return Tools.toBase64(signature.sign());
+        return signature.sign();
     }
 
     /**
@@ -42,13 +42,13 @@ public class Sign {
      * @throws NoSuchAlgorithmException
      * @throws InvalidAlgorithmParameterException
      */
-    public static Boolean verify(PublicKey publicKey, String signedMessage, String message) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+    public static Boolean verify(PublicKey publicKey, byte[] signedMessage, String message) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         Signature signature = Signature.getInstance("SHA512withECDSA");
         signature.setParameter(new ECGenParameterSpec("secp256k1"));
         signature.initVerify(publicKey);
 
         signature.update(message.getBytes(StandardCharsets.UTF_8));
 
-        return signature.verify(Tools.toBytes(signedMessage));
+        return signature.verify(signedMessage);
     }
 }

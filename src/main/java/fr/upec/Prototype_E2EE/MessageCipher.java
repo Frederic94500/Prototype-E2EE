@@ -1,11 +1,11 @@
 package fr.upec.Prototype_E2EE;
 
 public class MessageCipher {
-    public static String encrypt() {
-        //Encrypt with AES(256) + GCM, return as Base64
+    public static byte[] cipher() {
+        //Encrypt with AES(256) + GCM, return as byte[]
     }
 
-    public static String decrypt() {
-        //Decrypt, return as String
+    public static byte[] decipher() {
+        //Decrypt, return as byte[] or String, idk ¯\_(ツ)_/¯
     }
 }
