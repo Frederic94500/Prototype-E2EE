@@ -4,11 +4,20 @@ import javax.crypto.KeyGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+/**
+ * Salt is just a generator of random...
+ */
 public class Salt {
-    public static byte[] generate() throws NoSuchAlgorithmException {
+    /**
+     * Generate a SecureRandom using AES(256)
+     *
+     * @return Return a SecureRandom
+     * @throws NoSuchAlgorithmException
+     */
+    public static SecureRandom generate() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
-        SecureRandom secureRandom = new SecureRandom(keyGenerator.generateKey().getEncoded());
-        return secureRandom.generateSeed(256 / 8);
+        return new SecureRandom(keyGenerator.generateKey().getEncoded());
+
     }
 }
