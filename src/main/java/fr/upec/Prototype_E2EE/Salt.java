@@ -12,7 +12,6 @@ public class Salt {
      * Generate a SecureRandom using AES(256)
      *
      * @return Return a SecureRandom
-     * @throws NoSuchAlgorithmException
      */
     public static SecureRandom generate() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");

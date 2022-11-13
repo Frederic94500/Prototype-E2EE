@@ -14,10 +14,6 @@ public class Sign {
      * @param privateKey Your Private Key
      * @param message    Your Message
      * @return Return a signed message
-     * @throws SignatureException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeyException
-     * @throws InvalidAlgorithmParameterException
      */
     public static byte[] sign(PrivateKey privateKey, String message) throws SignatureException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
         Signature signature = Signature.getInstance("SHA512withECDSA");
@@ -37,10 +33,6 @@ public class Sign {
      * @param signedMessage The signed message
      * @param message       The message
      * @return Return a boolean if the message come from the other
-     * @throws InvalidKeyException
-     * @throws SignatureException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidAlgorithmParameterException
      */
     public static Boolean verify(PublicKey publicKey, byte[] signedMessage, String message) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         Signature signature = Signature.getInstance("SHA512withECDSA");

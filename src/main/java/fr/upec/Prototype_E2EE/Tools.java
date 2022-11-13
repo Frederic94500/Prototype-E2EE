@@ -46,12 +46,20 @@ public class Tools {
     }
 
     /**
+     * Decode String Base64 to String
+     *
+     * @param in String Base64
+     * @return Return String
+     */
+    public static String base64ToString(String in) {
+        return new String(toBytes(in));
+    }
+
+    /**
      * Retrieve Public Key with Base64 encoding
      *
      * @param base64String Public Key as Base64 encoding
      * @return Return Public Key
-     * @throws InvalidKeySpecException
-     * @throws NoSuchAlgorithmException
      */
     public static PublicKey getPublicKey(String base64String) throws InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] pubBytes = Tools.toBytes(base64String);
@@ -60,15 +68,33 @@ public class Tools {
         return keyFactory.generatePublic(x509EncodedKeySpec);
     }
 
+    /**
+     * Serializes Object to JSON
+     *
+     * @param o Object
+     * @return Return String JSON
+     */
     public static String toJSON(Object o) {
         Gson gson = new GsonBuilder().create();
         return gson.toJson(o);
     }
 
+    /**
+     * Decode Bytes to PublicKey
+     *
+     * @param bytesPubKey Bytes Public Key
+     * @return Return PublicKey
+     */
     public static PublicKey toPublicKey(byte[] bytesPubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(bytesPubKey));
     }
 
+    /**
+     * Decode Base64 to PublicKey
+     *
+     * @param base64PubKey Base64 Public Key
+     * @return Return PublicKey
+     */
     public static PublicKey toPublicKey(String base64PubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return toPublicKey(toBytes(base64PubKey));
     }
