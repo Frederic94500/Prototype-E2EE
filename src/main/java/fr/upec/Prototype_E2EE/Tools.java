@@ -3,6 +3,8 @@ package fr.upec.Prototype_E2EE;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -97,5 +99,16 @@ public class Tools {
      */
     public static PublicKey toPublicKey(String base64PubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         return toPublicKey(toBytes(base64PubKey));
+    }
+
+    /**
+     * Decode Base64 to SecretKey
+     *
+     * @param base64SecretKey Base64 Secret Key (Symmetric Key)
+     * @return Return SecretKey
+     */
+    public static SecretKey toSecretKey(String base64SecretKey) {
+        byte[] secretKeyBytes = toBytes(base64SecretKey);
+        return new SecretKeySpec(secretKeyBytes, "AES");
     }
 }

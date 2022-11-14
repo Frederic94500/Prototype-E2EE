@@ -3,7 +3,10 @@ package fr.upec.Prototype_E2EE;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.security.*;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,7 +34,7 @@ public class MainTest {
     }
 
     @Test
-    public void testMessage2() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
+    public void testMessage2() throws Exception {
         Message1 message1User1 = new Message1(Tools.toBase64(user1.getPublic().getEncoded()), 10, System.currentTimeMillis() / 1000L);
         String message1User1String = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User1String);
