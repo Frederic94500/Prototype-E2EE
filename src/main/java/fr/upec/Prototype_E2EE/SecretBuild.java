@@ -60,7 +60,6 @@ public class SecretBuild {
      *
      * @param other Other SecretBuild
      * @return Return a boolean if is the same
-     * @deprecated Maybe useless
      */
     public Boolean equals(SecretBuild other) {
         return this.myDate == other.otherDate &&
@@ -72,6 +71,26 @@ public class SecretBuild {
                 this.symKey.equals(other.symKey);
     }
 
+    public long getMyDate() {
+        return myDate;
+    }
+
+    public long getOtherDate() {
+        return otherDate;
+    }
+
+    public int getMyNonce() {
+        return myNonce;
+    }
+
+    public int getOtherNonce() {
+        return otherNonce;
+    }
+
+    public String getMyPubKey() {
+        return myPubKey;
+    }
+
     /**
      * Getter for Other Public Key
      *
@@ -79,5 +98,9 @@ public class SecretBuild {
      */
     public String getOtherPubKey() {
         return otherPubKey;
+    }
+
+    public String getSymKey() {
+        return symKey;
     }
 }
