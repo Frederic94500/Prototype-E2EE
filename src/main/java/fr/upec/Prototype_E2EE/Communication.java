@@ -62,12 +62,12 @@ public class Communication {
      * @param mySecretBuild Your SecretBuild
      * @return Return the signed and ciphered message 2 as Base64
      */
-    public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws InvalidAlgorithmParameterException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+    public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws Exception {
         String message2 = toJSON(mySecretBuild);
 
         //Need to have an ID verification in Android
         byte[] signedMessage = Sign.sign(myPrivateKey, message2);
-        byte[] cipheredSignedMessage = MessageCipher.cipher(signedMessage);
+        byte[] cipheredSignedMessage = MessageCipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
 
         return toBase64(cipheredSignedMessage);
     }
@@ -80,13 +80,13 @@ public class Communication {
      * @param otherMessage2 Message 2 received by other
      * @return Return a boolean if the message 2 is authentic
      */
-    public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, SignatureException, InvalidKeyException {
+    public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws Exception {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild);
         String otherSecretBuildJSON = toJSON(otherSecretBuild);
         String otherSecretBuildBase64 = toBase64(otherSecretBuildJSON);
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
-        byte[] signedMessage = MessageCipher.decipher(cipheredSignedOtherMessage2);
+        byte[] signedMessage = MessageCipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
 
         return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, otherSecretBuildBase64);
     }
