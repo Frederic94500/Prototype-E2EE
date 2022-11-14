@@ -14,7 +14,7 @@ public class MainTest {
     static private KeyPair user2;
 
     @BeforeClass
-    public static void setupClass() {
+    public static void setupClass() throws NoSuchAlgorithmException {
         user1 = Keys.generate();
         user2 = Keys.generate();
     }
