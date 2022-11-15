@@ -65,17 +65,22 @@ public class MainTest {
     }
 
     @Test
-    public void testSigningVerifying() throws InvalidAlgorithmParameterException, SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testSigningVerifying() throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
         String textString = "Around the World, Around the World";
         byte[] signatureUser1 = Sign.sign(user1.getPrivate(), textString);
-        assertTrue(Sign.verify(user1.getPublic(), signatureUser1, textString));
+        String signatureBase64User1 = Tools.toBase64(signatureUser1);
+
+        byte[] signatureFromUser1 = Tools.toBytes(signatureBase64User1);
+        assertTrue(Sign.verify(user1.getPublic(), signatureFromUser1, textString));
     }
 
     @Test
     public void testCipherDecipher() throws Exception {
         String textString = "Moeagare Moeagare GANDAMU!";
         byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(sbUser1.getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
-        assertEquals(new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextUser1)), textString);
+        byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
+        assertEquals(new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)), textString);
     }
 }
