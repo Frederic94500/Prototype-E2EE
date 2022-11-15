@@ -7,7 +7,6 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.spec.ECGenParameterSpec;
 
 /**
  * KeyExchange for the key negotiation/agreement
@@ -22,12 +21,12 @@ public class KeyExchange {
      * @return Return a PseudoRandom Key
      * @throws NoSuchAlgorithmException If HmacSHA512 doesn't exist...
      */
-    public static byte[] HKDFExtract(byte[] salt, String ikm) throws NoSuchAlgorithmException {
-        //String input_key = "Kono Dio Da!"; -> IKM
+    public static byte[] HKDFExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA512");
         //mac.update(Salt.generate()); -> salt
+        mac.init(ikm);
         mac.update(salt);
-        return mac.doFinal(ikm.getBytes(StandardCharsets.UTF_8));
+        return mac.doFinal();
     }
 
 
@@ -91,11 +90,13 @@ public class KeyExchange {
      */
     public static Key createSharedKey(PublicKey publicKeyOther, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
-        keyAgreement.init(privateKey, new ECGenParameterSpec("secp384r1"));
-        Key keyAgreed = keyAgreement.doPhase(publicKeyOther, true);
+        keyAgreement.init(privateKey/*, new ECGenParameterSpec("secp384r1")*/); //don't work
+        keyAgreement.doPhase(publicKeyOther, true);
+        byte[] keyAgreed = keyAgreement.generateSecret();
+        SecretKey symKey = new SecretKeySpec(keyAgreed, "ECDH");
 
-        byte[] hkdfExtract = HKDFExtract(keyAgreed.getEncoded(), "Kono Dio da!");
-        byte[] hkdfExpand = HKDFExpand(hkdfExtract, "ZA WARUDOOOOOO", 256);
+        byte[] hkdfExtract = HKDFExtract("Kono Dio da!".getBytes(), symKey);
+        byte[] hkdfExpand = HKDFExpand(hkdfExtract, "ZA WARUDOOOOOO", 32);
 
         return new SecretKeySpec(hkdfExpand, "AES");
     }

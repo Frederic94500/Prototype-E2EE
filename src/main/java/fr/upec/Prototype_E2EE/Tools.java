@@ -3,12 +3,14 @@ package fr.upec.Prototype_E2EE;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -66,7 +68,7 @@ public class Tools {
     public static PublicKey getPublicKey(String base64String) throws InvalidKeySpecException, NoSuchAlgorithmException {
         byte[] pubBytes = Tools.toBytes(base64String);
         X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pubBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
         return keyFactory.generatePublic(x509EncodedKeySpec);
     }
 
@@ -88,7 +90,7 @@ public class Tools {
      * @return Return PublicKey
      */
     public static PublicKey toPublicKey(byte[] bytesPubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return KeyFactory.getInstance("DSA").generatePublic(new X509EncodedKeySpec(bytesPubKey));
+        return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(bytesPubKey));
     }
 
     /**
@@ -110,5 +112,17 @@ public class Tools {
     public static SecretKey toSecretKey(String base64SecretKey) {
         byte[] secretKeyBytes = toBytes(base64SecretKey);
         return new SecretKeySpec(secretKeyBytes, "AES");
+    }
+
+    /**
+     * Generate a SecureRandom using AES(256)
+     *
+     * @return Return a SecureRandom
+     */
+    public static SecureRandom generateSecureRandom() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(256);
+        return new SecureRandom(keyGenerator.generateKey().getEncoded());
+
     }
 }

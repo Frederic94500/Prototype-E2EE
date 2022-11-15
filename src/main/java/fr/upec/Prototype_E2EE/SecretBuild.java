@@ -63,9 +63,7 @@ public class SecretBuild {
      */
     public Boolean equals(SecretBuild other) {
         return this.myDate == other.otherDate &&
-                this.otherDate == other.myDate &&
-                this.myNonce == other.otherNonce &&
-                this.otherNonce == other.myNonce &&
+                this.otherDate == other.myDate && //Nonce can't be compared
                 this.myPubKey.equals(other.otherPubKey) &&
                 this.otherPubKey.equals(other.myPubKey) &&
                 this.symKey.equals(other.symKey);
