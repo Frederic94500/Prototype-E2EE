@@ -35,11 +35,11 @@ public class Communication {
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
      */
-    public static SecretBuild handleMessage1(KeyPair myKeyPair, String otherMessage1) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+    public static SecretBuild handleMessage1(KeyPair myKeyPair, Message1 myMessage1, String otherMessage1) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
         String otherMessage1JSON = base64ToString(otherMessage1);
         Message1 otherMessage = new Gson().fromJson(otherMessage1JSON, Message1.class);
 
-        int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
+        //int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
         String myPubKey = toBase64(myKeyPair.getPublic().getEncoded()); //Need to retrieve my pub key
         PrivateKey myPrivKey = myKeyPair.getPrivate(); //Same as pub key -> UNSAFE
         PublicKey otherPubKey = getPublicKey(otherMessage.getPubKey());
@@ -47,7 +47,7 @@ public class Communication {
 
         return new SecretBuild((System.currentTimeMillis() / 1000L),
                 otherMessage.getTimestamp(),
-                myNonce,
+                myMessage1.getNonce(),
                 otherMessage.getNonce(),
                 myPubKey,
                 otherMessage.getPubKey(),
@@ -63,10 +63,11 @@ public class Communication {
      * @return Return the signed and ciphered message 2 as Base64
      */
     public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws Exception {
-        String message2 = toJSON(mySecretBuild);
+        String message2JSON = toJSON(mySecretBuild);
+        String message2Base64 = toBase64(message2JSON);
 
         //Need to have an ID verification in Android
-        byte[] signedMessage = Sign.sign(myPrivateKey, message2);
+        byte[] signedMessage = Sign.sign(myPrivateKey, message2Base64);
         byte[] cipheredSignedMessage = MessageCipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
 
         return toBase64(cipheredSignedMessage);
