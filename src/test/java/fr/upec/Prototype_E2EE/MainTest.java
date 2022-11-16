@@ -9,8 +9,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MainTest {
     static private KeyPair user1;
@@ -35,13 +34,13 @@ public class MainTest {
         String message1User2String = Communication.createMessage1(message1User2);
         SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2String);
 
-        assertEquals(message1User1.getPubKey(), secretBuildUser2.getOtherPubKey());
-        assertEquals(message1User1.getNonce(), secretBuildUser2.getOtherNonce());
         assertEquals(message1User1.getTimestamp(), secretBuildUser2.getOtherDate());
+        assertEquals(message1User1.getNonce(), secretBuildUser2.getOtherNonce());
+        assertArrayEquals(message1User1.getPubKey(), secretBuildUser2.getOtherPubKey());
 
-        assertEquals(message1User2.getPubKey(), secretBuildUser1.getOtherPubKey());
-        assertEquals(message1User2.getNonce(), secretBuildUser1.getOtherNonce());
         assertEquals(message1User2.getTimestamp(), secretBuildUser1.getOtherDate());
+        assertEquals(message1User2.getNonce(), secretBuildUser1.getOtherNonce());
+        assertArrayEquals(message1User2.getPubKey(), secretBuildUser1.getOtherPubKey());
     }
 
     @Test
