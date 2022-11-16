@@ -1,23 +1,27 @@
 package fr.upec.Prototype_E2EE;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 /**
- * Object for SecretBuild
+ * Object for SecretBuild 238 bytes
  * MUST BE HIDDEN! CONTAINS SENSITIVE INFORMATION!
+ * long myDate = 8 bytes
+ * long otherDate = 8 bytes
+ * int myNonce = 4 bytes
+ * int otherNonce = 4 bytes
+ * byte[] myPubKey = 91 bytes
+ * byte[] otherPubKey = 91 bytes
+ * byte[] symKey = 32 bytes
  */
 public class SecretBuild {
-    private long myDate;
-    private long otherDate;
-    private int myNonce;
-    private int otherNonce;
-    private String myPubKey;
-    private String otherPubKey;
-    private String symKey;
-
-    /**
-     * Default constructor for Gson
-     */
-    public SecretBuild() {
-    }
+    private final long myDate;
+    private final long otherDate;
+    private final int myNonce;
+    private final int otherNonce;
+    private final byte[] myPubKey;
+    private final byte[] otherPubKey;
+    private final byte[] symKey;
 
     /**
      * SecretBuild Constructor
@@ -30,7 +34,7 @@ public class SecretBuild {
      * @param otherPubKey My Public Key as Base64
      * @param symKey      Symmetric Key as Base64
      */
-    public SecretBuild(long myDate, long otherDate, int myNonce, int otherNonce, String myPubKey, String otherPubKey, String symKey) {
+    public SecretBuild(long myDate, long otherDate, int myNonce, int otherNonce, byte[] myPubKey, byte[] otherPubKey, byte[] symKey) {
         this.myDate = myDate;
         this.otherDate = otherDate;
         this.myNonce = myNonce;
@@ -40,19 +44,21 @@ public class SecretBuild {
         this.symKey = symKey;
     }
 
+    //Get otherSecretBuild works too
+
     /**
      * Constructor for swapping information
      *
      * @param mySecretBuild My SecretBuild
      */
-    public SecretBuild(SecretBuild mySecretBuild) {
+    SecretBuild(SecretBuild mySecretBuild) {
         this.myDate = mySecretBuild.otherDate;
         this.otherDate = mySecretBuild.myDate;
         this.myNonce = mySecretBuild.otherNonce;
         this.otherNonce = mySecretBuild.myNonce;
         this.myPubKey = mySecretBuild.otherPubKey;
         this.otherPubKey = mySecretBuild.myPubKey;
-        this.symKey = mySecretBuild.symKey;
+        this.symKey = null;
     }
 
     /**
@@ -64,9 +70,20 @@ public class SecretBuild {
     public Boolean equals(SecretBuild other) {
         return this.myDate == other.otherDate &&
                 this.otherDate == other.myDate && //Nonce can't be compared
-                this.myPubKey.equals(other.otherPubKey) &&
-                this.otherPubKey.equals(other.myPubKey) &&
-                this.symKey.equals(other.symKey);
+                Arrays.equals(this.myPubKey, other.otherPubKey) &&
+                Arrays.equals(this.otherPubKey, other.myPubKey) &&
+                Arrays.equals(this.symKey, other.symKey);
+    }
+
+    public byte[] toBytesWithoutSymKey() {
+        ByteBuffer buffer = ByteBuffer.allocate(206);
+        buffer.putLong(myDate);
+        buffer.putLong(otherDate);
+        buffer.putInt(myNonce);
+        buffer.putInt(otherNonce);
+        buffer.put(myPubKey);
+        buffer.put(otherPubKey);
+        return buffer.array();
     }
 
     public long getMyDate() {
@@ -85,7 +102,7 @@ public class SecretBuild {
         return otherNonce;
     }
 
-    public String getMyPubKey() {
+    public byte[] getMyPubKey() {
         return myPubKey;
     }
 
@@ -94,11 +111,11 @@ public class SecretBuild {
      *
      * @return Return Other Public Key as Base64
      */
-    public String getOtherPubKey() {
+    public byte[] getOtherPubKey() {
         return otherPubKey;
     }
 
-    public String getSymKey() {
+    public byte[] getSymKey() {
         return symKey;
     }
 }

@@ -1,11 +1,12 @@
 package fr.upec.Prototype_E2EE;
 
-import com.google.gson.Gson;
-
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import static fr.upec.Prototype_E2EE.Tools.*;
+import static java.util.Arrays.copyOfRange;
 
 /**
  * Create and Handle Messages
@@ -13,60 +14,61 @@ import static fr.upec.Prototype_E2EE.Tools.*;
 public class Communication {
     /**
      * Create message 1 for the key negotiation/agreement
-     * Message1 -> JSON -> Base64
+     * Message1 -> Base64
      *
      * @param publicKey Your Public Key
      * @param salt      A salt number, a counter of message
      * @return Return the message 1 as Base64
      */
     public static String createMessage1(PublicKey publicKey, int salt) {
-        Message1 message1 = new Message1(toBase64(publicKey.getEncoded()), salt, System.currentTimeMillis() / 1000L);
-        return createMessage1(message1);
+        Message1 message1 = new Message1(System.currentTimeMillis() / 1000L, salt, publicKey.getEncoded());
+        return toBase64(message1.toBytes());
     }
 
     public static String createMessage1(Message1 message1) {
-        return toBase64(toJSON(message1));
+        return toBase64(message1.toBytes());
     }
 
     /**
      * Handle the message 1 received from other
-     * otherMessage1 (Base64) -> JSON -> Message1
+     * otherMessage1 (Base64) -> Message1
      *
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
      */
-    public static SecretBuild handleMessage1(KeyPair myKeyPair, Message1 myMessage1, String otherMessage1) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
-        String otherMessage1JSON = base64ToString(otherMessage1);
-        Message1 otherMessage = new Gson().fromJson(otherMessage1JSON, Message1.class);
+    public static SecretBuild handleMessage1(KeyPair myKeyPair, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
+        byte[] otherMessage1Bytes = toBytes(otherMessage1);
 
         //int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
-        String myPubKey = toBase64(myKeyPair.getPublic().getEncoded()); //Need to retrieve my pub key
+        long otherTimestamp = toLong(otherMessage1Bytes, 0, 8);
+        int otherNonce = toInteger(otherMessage1Bytes, 8, 12);
+        byte[] otherPubKeyByte = copyOfRange(otherMessage1Bytes, 12, 103);
+
+        //Need to retrieve my pub key
         PrivateKey myPrivKey = myKeyPair.getPrivate(); //Same as pub key -> UNSAFE
-        PublicKey otherPubKey = getPublicKey(otherMessage.getPubKey());
-        String symKey = toBase64(KeyExchange.createSharedKey(otherPubKey, myPrivKey).getEncoded());
+        PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
+        byte[] symKey = KeyExchange.createSharedKey(otherPubKey, myPrivKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
         return new SecretBuild((System.currentTimeMillis() / 1000L),
-                otherMessage.getTimestamp(),
+                otherTimestamp,
                 myMessage1.getNonce(),
-                otherMessage.getNonce(),
-                myPubKey,
-                otherMessage.getPubKey(),
+                otherNonce,
+                myKeyPair.getPublic().getEncoded(),
+                otherPubKeyByte,
                 symKey);
     }
 
     /**
      * Create message 2 by signing then ciphering
-     * SecretBuild -> JSON -> Signed (Bytes) -> Ciphered (Bytes) -> Base64
+     * SecretBuild -> Signed (Bytes) -> Ciphered (Bytes) -> Base64
      *
      * @param myPrivateKey  Your Private Key
      * @param mySecretBuild Your SecretBuild
      * @return Return the signed and ciphered message 2 as Base64
      */
     public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws Exception {
-        String message2JSON = toJSON(mySecretBuild);
-        String message2Base64 = toBase64(message2JSON);
+        String message2Base64 = toBase64(mySecretBuild.toBytesWithoutSymKey());
 
-        //Need to have an ID verification in Android
         byte[] signedMessage = Sign.sign(myPrivateKey, message2Base64);
         byte[] cipheredSignedMessage = MessageCipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
 
@@ -83,12 +85,11 @@ public class Communication {
      */
     public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws Exception {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild);
-        String otherSecretBuildJSON = toJSON(otherSecretBuild);
-        String otherSecretBuildBase64 = toBase64(otherSecretBuildJSON);
+        byte[] otherSecretBuildBytes = otherSecretBuild.toBytesWithoutSymKey();
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
         byte[] signedMessage = MessageCipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
 
-        return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, otherSecretBuildBase64);
+        return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, toBase64(otherSecretBuildBytes));
     }
 }

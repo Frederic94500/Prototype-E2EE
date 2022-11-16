@@ -1,39 +1,46 @@
 package fr.upec.Prototype_E2EE;
 
+import java.nio.ByteBuffer;
+
 /**
  * Object for Message 1
+ * long = 8 bytes
+ * int = 4 bytes
+ * pubKey = 91 bytes
  */
 public class Message1 {
-    private String pubKey;
-    private int nonce;
-    private long timestamp;
-
-    /**
-     * Default constructor for Gson
-     */
-    public Message1() {
-    }
+    private final long timestamp;
+    private final int nonce;
+    private final byte[] pubKey;
 
     /**
      * Message1 Constructor
      *
-     * @param pubKey    PublicKey as Base64
-     * @param nonce     Nonce (salt)
      * @param timestamp UNIX Timestamp
+     * @param nonce     Nonce (salt)
+     * @param pubKey    PublicKey as Base64
      */
-    public Message1(String pubKey, int nonce, long timestamp) {
-        this.pubKey = pubKey;
-        this.nonce = nonce;
+    public Message1(long timestamp, int nonce, byte[] pubKey) {
         this.timestamp = timestamp;
+        this.nonce = nonce;
+        this.pubKey = pubKey;
+    }
+
+    public byte[] toBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(103);
+        buffer.putLong(timestamp);
+        buffer.putInt(nonce);
+        buffer.put(pubKey);
+        return buffer.array();
     }
 
     /**
-     * Getter for Public Key
+     * Getter for Timestamp
      *
-     * @return Return Public Key as Base64
+     * @return Return UNIX Timestamp
      */
-    public String getPubKey() {
-        return pubKey;
+    public long getTimestamp() {
+        return timestamp;
     }
 
     /**
@@ -46,11 +53,11 @@ public class Message1 {
     }
 
     /**
-     * Getter for Timestamp
+     * Getter for Public Key
      *
-     * @return Return UNIX Timestamp
+     * @return Return Public Key as Base64
      */
-    public long getTimestamp() {
-        return timestamp;
+    public byte[] getPubKey() {
+        return pubKey;
     }
 }

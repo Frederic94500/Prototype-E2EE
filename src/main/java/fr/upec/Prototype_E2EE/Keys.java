@@ -17,7 +17,7 @@ public class Keys {
      */
     public static KeyPair generate() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-        keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"), Tools.generateSecureRandom()); //Not secp256k1
+        keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"), Tools.generateSecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 }

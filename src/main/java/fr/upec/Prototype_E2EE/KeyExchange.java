@@ -21,7 +21,7 @@ public class KeyExchange {
      * @return Return a PseudoRandom Key
      * @throws NoSuchAlgorithmException If HmacSHA512 doesn't exist...
      */
-    public static byte[] HKDFExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA512");
         //mac.update(Salt.generate()); -> salt
         mac.init(ikm);
@@ -42,7 +42,7 @@ public class KeyExchange {
      * @throws NoSuchAlgorithmException If HmacSHA512 doesn't exist...
      * @throws InvalidKeyException      If the key is incorrect
      */
-    public static byte[] HKDFExpand(byte[] prk, String info, int olb) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static byte[] hkdfExpand(byte[] prk, String info, int olb) throws NoSuchAlgorithmException, InvalidKeyException {
         if (olb <= 0 || prk == null) {
             throw new IllegalArgumentException();
         }
@@ -82,21 +82,24 @@ public class KeyExchange {
     }
 
     /**
-     * Create a shared key for the key negotiation/agreement using ECDH(secp384r1)+HKDF(SHA512)
+     * Create a shared key for the key negotiation/agreement using ECDH+HKDF(SHA512)
      *
      * @param publicKeyOther Public Key of the other person
      * @param privateKey     Your Private Key
      * @return Return the shared key
      */
-    public static Key createSharedKey(PublicKey publicKeyOther, PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
+    public static Key createSharedKey(PublicKey publicKeyOther, PrivateKey privateKey, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
-        keyAgreement.init(privateKey/*, new ECGenParameterSpec("secp384r1")*/); //don't work
+        keyAgreement.init(privateKey);
         keyAgreement.doPhase(publicKeyOther, true);
         byte[] keyAgreed = keyAgreement.generateSecret();
         SecretKey symKey = new SecretKeySpec(keyAgreed, "ECDH");
 
-        byte[] hkdfExtract = HKDFExtract("Kono Dio da!".getBytes(), symKey);
-        byte[] hkdfExpand = HKDFExpand(hkdfExtract, "ZA WARUDOOOOOO", 32);
+        int xor = myNonce ^ otherNonce;
+
+        //XOR between 2 nonces, info in arg
+        byte[] hkdfExtract = hkdfExtract(ByteBuffer.allocate(4).putInt(xor).array(), symKey);
+        byte[] hkdfExpand = hkdfExpand(hkdfExtract, info, 32);
 
         return new SecretKeySpec(hkdfExpand, "AES");
     }

@@ -4,8 +4,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,9 +25,9 @@ public class MainTest {
     }
 
     @Test
-    public void testMessage1() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException {
-        Message1 message1User1 = new Message1(Tools.toBase64(user1.getPublic().getEncoded()), 10, System.currentTimeMillis() / 1000L);
-        Message1 message1User2 = new Message1(Tools.toBase64(user2.getPublic().getEncoded()), 100, System.currentTimeMillis() / 1000L);
+    public void testMessage1() throws GeneralSecurityException {
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, 10, user1.getPublic().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, 100, user2.getPublic().getEncoded());
 
         String message1User1String = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1String);
@@ -44,8 +46,8 @@ public class MainTest {
 
     @Test
     public void testMessage2() throws Exception {
-        Message1 message1User1 = new Message1(Tools.toBase64(user1.getPublic().getEncoded()), 10, System.currentTimeMillis() / 1000L);
-        Message1 message1User2 = new Message1(Tools.toBase64(user2.getPublic().getEncoded()), 100, System.currentTimeMillis() / 1000L);
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, 10, user1.getPublic().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, 100, user2.getPublic().getEncoded());
 
         String message1User1String = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1String);
@@ -65,7 +67,7 @@ public class MainTest {
     }
 
     @Test
-    public void testSigningVerifying() throws SignatureException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testSigningVerifying() throws GeneralSecurityException {
         String textString = "Around the World, Around the World";
         byte[] signatureUser1 = Sign.sign(user1.getPrivate(), textString);
         String signatureBase64User1 = Tools.toBase64(signatureUser1);
@@ -75,7 +77,7 @@ public class MainTest {
     }
 
     @Test
-    public void testCipherDecipher() throws Exception {
+    public void testCipherDecipher() throws GeneralSecurityException {
         String textString = "Moeagare Moeagare GANDAMU!";
         byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(sbUser1.getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
