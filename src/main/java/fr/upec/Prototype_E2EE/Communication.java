@@ -36,9 +36,10 @@ public class Communication {
      * @return Return a SecureBuild
      */
     public static SecretBuild handleMessage1(KeyPair myKeyPair, Message1 myMessage1, String otherMessage1) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException, InvalidKeyException {
+
         String otherMessage1JSON = base64ToString(otherMessage1);
         Message1 otherMessage = new Gson().fromJson(otherMessage1JSON, Message1.class);
-
+        //verifier avec la methode de annuaire!!! si oui true sinon  lancer une erreur
         //int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
         String myPubKey = toBase64(myKeyPair.getPublic().getEncoded()); //Need to retrieve my pub key
         PrivateKey myPrivKey = myKeyPair.getPrivate(); //Same as pub key -> UNSAFE
