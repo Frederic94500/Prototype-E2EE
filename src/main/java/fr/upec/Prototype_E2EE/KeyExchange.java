@@ -84,11 +84,11 @@ public class KeyExchange {
     /**
      * Create a shared key for the key negotiation/agreement using ECDH+HKDF(SHA512)
      *
-     * @param publicKeyOther Public Key of the other person
      * @param privateKey     Your Private Key
+     * @param publicKeyOther Public Key of the other person
      * @return Return the shared key
      */
-    public static Key createSharedKey(PublicKey publicKeyOther, PrivateKey privateKey, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static Key createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(publicKeyOther, true);

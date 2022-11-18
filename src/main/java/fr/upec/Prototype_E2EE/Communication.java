@@ -47,7 +47,7 @@ public class Communication {
         //Need to retrieve my pub key
         PrivateKey myPrivKey = myKeyPair.getPrivate(); //Same as pub key -> UNSAFE
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(otherPubKey, myPrivKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+        byte[] symKey = KeyExchange.createSharedKey(myPrivKey, otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
         return new SecretBuild((System.currentTimeMillis() / 1000L),
                 otherTimestamp,
