@@ -44,6 +44,12 @@ public class Tools {
         return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(bytesPubKey));
     }
 
+    /**
+     * Decode Bytes to SecretKey
+     *
+     * @param secretKeyBytes SecretKey in byte[]
+     * @return Return a SecretKey
+     */
     public static SecretKey toSecretKey(byte[] secretKeyBytes) {
         return new SecretKeySpec(secretKeyBytes, "AES");
     }
@@ -59,11 +65,27 @@ public class Tools {
         return new SecureRandom(keyGenerator.generateKey().getEncoded());
     }
 
+    /**
+     * Transform Bytes to Long from byte[]
+     *
+     * @param tab  byte[] source
+     * @param from Start index
+     * @param to   End index
+     * @return Return a Long
+     */
     public static Long toLong(byte[] tab, int from, int to) {
         ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
         return bb.getLong();
     }
 
+    /**
+     * Transform Bytes to int from byte[]
+     *
+     * @param tab  byte[] source
+     * @param from Start index
+     * @param to   End index
+     * @return Return an int
+     */
     public static int toInteger(byte[] tab, int from, int to) {
         ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
         return bb.getInt();

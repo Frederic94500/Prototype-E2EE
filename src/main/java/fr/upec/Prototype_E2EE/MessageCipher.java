@@ -60,5 +60,4 @@ public class MessageCipher {
         // Perform Decryption and Return
         return cipher.doFinal(cipherMessage, GCM_IV_LENGTH, cipherMessage.length - GCM_IV_LENGTH);
     }
-    //yes
 }

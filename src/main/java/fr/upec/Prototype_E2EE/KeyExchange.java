@@ -23,7 +23,6 @@ public class KeyExchange {
      */
     public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA512");
-        //mac.update(Salt.generate()); -> salt
         mac.init(ikm);
         mac.update(salt);
         return mac.doFinal();
@@ -47,12 +46,10 @@ public class KeyExchange {
             throw new IllegalArgumentException();
         }
 
-        //byte[] prk = HKDFExtract(); -> PRK
         SecretKey secretKey = new SecretKeySpec(prk, "HmacSHA512");
         Mac mac = Mac.getInstance("HmacSHA512");
         mac.init(secretKey);
 
-        //byte[] info = "ZA WARUDOOOOOOOOOOOOOO".getBytes(); -> info
         byte[] blockN = new byte[0];
 
         int iterations = (int) Math.ceil(((double) olb) / ((double) mac.getMacLength()));
@@ -97,7 +94,6 @@ public class KeyExchange {
 
         int xor = myNonce ^ otherNonce;
 
-        //XOR between 2 nonces, info in arg
         byte[] hkdfExtract = hkdfExtract(ByteBuffer.allocate(4).putInt(xor).array(), symKey);
         byte[] hkdfExpand = hkdfExpand(hkdfExtract, info, 32);
 

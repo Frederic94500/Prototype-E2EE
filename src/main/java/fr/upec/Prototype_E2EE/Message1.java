@@ -26,6 +26,11 @@ public class Message1 {
         this.pubKey = pubKey;
     }
 
+    /**
+     * Encode Message1 to byte[]
+     *
+     * @return Return Message1 as byte[]
+     */
     public byte[] toBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(103);
         buffer.putLong(timestamp);

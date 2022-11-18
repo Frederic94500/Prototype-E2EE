@@ -44,10 +44,8 @@ public class SecretBuild {
         this.symKey = symKey;
     }
 
-    //Get otherSecretBuild works too
-
     /**
-     * Constructor for swapping information
+     * Constructor to get the same SecretBuild of other
      *
      * @param mySecretBuild My SecretBuild
      */
@@ -75,6 +73,11 @@ public class SecretBuild {
                 Arrays.equals(this.symKey, other.symKey);
     }
 
+    /**
+     * Encode SecretBuild without symmetric key
+     *
+     * @return Return SecretBuild as byte[]
+     */
     public byte[] toBytesWithoutSymKey() {
         ByteBuffer buffer = ByteBuffer.allocate(206);
         buffer.putLong(myDate);
@@ -106,11 +109,6 @@ public class SecretBuild {
         return myPubKey;
     }
 
-    /**
-     * Getter for Other Public Key
-     *
-     * @return Return Other Public Key as Base64
-     */
     public byte[] getOtherPubKey() {
         return otherPubKey;
     }
