@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 /**
  * Object for SecretBuild 238 bytes
- * MUST BE HIDDEN! CONTAINS SENSITIVE INFORMATION!
+ * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  * long myDate = 8 bytes
  * long otherDate = 8 bytes
  * int myNonce = 4 bytes

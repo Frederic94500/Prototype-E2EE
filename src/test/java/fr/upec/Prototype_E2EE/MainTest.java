@@ -3,6 +3,7 @@ package fr.upec.Prototype_E2EE;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -83,5 +84,16 @@ public class MainTest {
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
         assertEquals(new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)), textString);
+    }
+
+    @Test
+    public void testSaveAndLoad() throws GeneralSecurityException, FileNotFoundException {
+        MyKeyPair myKeyPair = MyKeyPair.load(); //Without File
+        MyKeyPair myKeyPairViaFile = MyKeyPair.load(); //With File
+
+        assertArrayEquals(myKeyPair.getMyPublicKey().getEncoded(), myKeyPairViaFile.getMyPublicKey().getEncoded());
+        assertArrayEquals(myKeyPair.getMyPrivateKey().getEncoded(), myKeyPairViaFile.getMyPrivateKey().getEncoded());
+
+        MyKeyPair.deleteFile();
     }
 }

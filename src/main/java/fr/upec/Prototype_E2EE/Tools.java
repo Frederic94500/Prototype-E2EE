@@ -5,6 +5,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
@@ -42,6 +43,16 @@ public class Tools {
      */
     public static PublicKey toPublicKey(byte[] bytesPubKey) throws GeneralSecurityException {
         return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(bytesPubKey));
+    }
+
+    /**
+     * Decode Bytes to PrivateKey
+     *
+     * @param privateKeyBytes Bytes Private Key
+     * @return Return PrivateKey
+     */
+    public static PrivateKey toPrivateKey(byte[] privateKeyBytes) throws GeneralSecurityException {
+        return KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
     }
 
     /**
