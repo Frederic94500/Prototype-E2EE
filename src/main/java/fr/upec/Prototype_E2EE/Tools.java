@@ -1,19 +1,15 @@
 package fr.upec.Prototype_E2EE;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import java.nio.ByteBuffer;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+
+import static java.util.Arrays.copyOfRange;
 
 /**
  * Some tools...
@@ -30,16 +26,6 @@ public class Tools {
     }
 
     /**
-     * Encode String to String Base64
-     *
-     * @param in String
-     * @return Return String Base64
-     */
-    public static String toBase64(String in) {
-        return Base64.getEncoder().encodeToString(in.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
      * Decode String Base64 to bytes
      *
      * @param in String Base64
@@ -50,67 +36,32 @@ public class Tools {
     }
 
     /**
-     * Decode String Base64 to String
-     *
-     * @param in String Base64
-     * @return Return String
-     */
-    public static String base64ToString(String in) {
-        return new String(toBytes(in));
-    }
-
-    /**
-     * Retrieve Public Key with Base64 encoding
-     *
-     * @param base64String Public Key as Base64 encoding
-     * @return Return Public Key
-     */
-    public static PublicKey getPublicKey(String base64String) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        byte[] pubBytes = Tools.toBytes(base64String);
-        X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(pubBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("EC");
-        return keyFactory.generatePublic(x509EncodedKeySpec);
-    }
-
-    /**
-     * Serializes Object to JSON
-     *
-     * @param o Object
-     * @return Return String JSON
-     */
-    public static String toJSON(Object o) {
-        Gson gson = new GsonBuilder().create();
-        return gson.toJson(o);
-    }
-
-    /**
      * Decode Bytes to PublicKey
      *
      * @param bytesPubKey Bytes Public Key
      * @return Return PublicKey
      */
-    public static PublicKey toPublicKey(byte[] bytesPubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PublicKey toPublicKey(byte[] bytesPubKey) throws GeneralSecurityException {
         return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(bytesPubKey));
     }
 
     /**
-     * Decode Base64 to PublicKey
+     * Decode Bytes to PrivateKey
      *
-     * @param base64PubKey Base64 Public Key
-     * @return Return PublicKey
+     * @param privateKeyBytes Bytes Private Key
+     * @return Return PrivateKey
      */
-    public static PublicKey toPublicKey(String base64PubKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        return toPublicKey(toBytes(base64PubKey));
+    public static PrivateKey toPrivateKey(byte[] privateKeyBytes) throws GeneralSecurityException {
+        return KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
     }
 
     /**
-     * Decode Base64 to SecretKey
+     * Decode Bytes to SecretKey
      *
-     * @param base64SecretKey Base64 Secret Key (Symmetric Key)
-     * @return Return SecretKey
+     * @param secretKeyBytes SecretKey in byte[]
+     * @return Return a SecretKey
      */
-    public static SecretKey toSecretKey(String base64SecretKey) {
-        byte[] secretKeyBytes = toBytes(base64SecretKey);
+    public static SecretKey toSecretKey(byte[] secretKeyBytes) {
         return new SecretKeySpec(secretKeyBytes, "AES");
     }
 
@@ -123,6 +74,31 @@ public class Tools {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
         return new SecureRandom(keyGenerator.generateKey().getEncoded());
+    }
 
+    /**
+     * Transform Bytes to Long from byte[]
+     *
+     * @param tab  byte[] source
+     * @param from Start index
+     * @param to   End index
+     * @return Return a Long
+     */
+    public static Long toLong(byte[] tab, int from, int to) {
+        ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
+        return bb.getLong();
+    }
+
+    /**
+     * Transform Bytes to int from byte[]
+     *
+     * @param tab  byte[] source
+     * @param from Start index
+     * @param to   End index
+     * @return Return an int
+     */
+    public static int toInteger(byte[] tab, int from, int to) {
+        ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
+        return bb.getInt();
     }
 }
