@@ -42,14 +42,14 @@ public class MyKeyPair {
      * @return Return a MyKeyPair
      */
     public static MyKeyPair load() throws GeneralSecurityException, FileNotFoundException {
-        if (isFileExists()) {
+        if (Tools.isFileExists(filename)) {
             Scanner scanner = new Scanner(new File(filename));
             String data = scanner.nextLine();
             scanner.close();
             String[] dataBase64 = data.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {
-            createFile();
+            Tools.createFile(filename);
             MyKeyPair mkp = new MyKeyPair();
             mkp.save();
             return mkp;
@@ -57,25 +57,8 @@ public class MyKeyPair {
     }
 
     /**
-     * Check if .MyKeyPair exists
-     *
-     * @return Return a boolean if the file exists
+     * Delete this file
      */
-    public static boolean isFileExists() {
-        return new File(filename).exists();
-    }
-
-    /**
-     * Create .MyKeyPair
-     */
-    public static void createFile() {
-        try {
-            new File(filename).createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void deleteFile() {
         new File(filename).deleteOnExit();
     }
@@ -104,7 +87,7 @@ public class MyKeyPair {
     private void save() {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
         String myPrivateKeyBase64 = Tools.toBase64(myPrivateKey.getEncoded());
-        if (isFileExists()) {
+        if (Tools.isFileExists(filename)) {
             try {
                 FileWriter writer = new FileWriter(filename);
                 writer.write(myPublicKeyBase64 + "," + myPrivateKeyBase64);

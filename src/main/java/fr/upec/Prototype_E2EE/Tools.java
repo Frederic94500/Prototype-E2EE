@@ -3,6 +3,8 @@ package fr.upec.Prototype_E2EE;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -100,5 +102,28 @@ public class Tools {
     public static int toInteger(byte[] tab, int from, int to) {
         ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
         return bb.getInt();
+    }
+
+    /**
+     * Check if a file exists
+     *
+     * @param filename File to check
+     * @return Return a boolean if the file exists
+     */
+    public static boolean isFileExists(String filename) {
+        return new File(filename).exists();
+    }
+
+    /**
+     * Create a file
+     *
+     * @param filename File to create
+     */
+    public static void createFile(String filename) {
+        try {
+            new File(filename).createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
