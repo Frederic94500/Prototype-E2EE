@@ -126,4 +126,11 @@ public class Tools {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Delete a file
+     */
+    public static void deleteFile(String filename) {
+        new File(filename).deleteOnExit();
+    }
 }

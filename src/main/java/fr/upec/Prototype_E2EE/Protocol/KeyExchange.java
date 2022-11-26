@@ -1,4 +1,4 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.Protocol;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;

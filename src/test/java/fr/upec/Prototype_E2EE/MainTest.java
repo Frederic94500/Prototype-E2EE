@@ -2,6 +2,7 @@ package fr.upec.Prototype_E2EE;
 
 import fr.upec.Prototype_E2EE.MyState.MyInformation;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
+import fr.upec.Prototype_E2EE.Protocol.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -33,10 +34,10 @@ public class MainTest {
         Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, 100, user2.getPublic().getEncoded());
 
         String message1User1String = Communication.createMessage1(message1User1);
-        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1String);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2.getPrivate(), user2.getPublic(), message1User2, message1User1String);
 
         String message1User2String = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2String);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1.getPrivate(), user1.getPublic(), message1User1, message1User2String);
 
         assertEquals(message1User1.getTimestamp(), secretBuildUser2.getOtherDate());
         assertEquals(message1User1.getNonce(), secretBuildUser2.getOtherNonce());
@@ -53,10 +54,10 @@ public class MainTest {
         Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, 100, user2.getPublic().getEncoded());
 
         String message1User1String = Communication.createMessage1(message1User1);
-        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1String);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2.getPrivate(), user2.getPublic(), message1User2, message1User1String);
 
         String message1User2String = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2String);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1.getPrivate(), user1.getPublic(), message1User1, message1User2String);
 
         assertTrue(secretBuildUser1.equals(secretBuildUser2));
         sbUser1 = secretBuildUser1;
@@ -86,7 +87,7 @@ public class MainTest {
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
-        assertEquals(new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)), textString);
+        assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)));
     }
 
     @Test
@@ -97,7 +98,7 @@ public class MainTest {
         assertArrayEquals(myKeyPair.getMyPublicKey().getEncoded(), myKeyPairViaFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myKeyPair.getMyPrivateKey().getEncoded(), myKeyPairViaFile.getMyPrivateKey().getEncoded());
 
-        MyKeyPair.deleteFile();
+        Tools.deleteFile(MyKeyPair.filename);
     }
 
     @Test
@@ -107,11 +108,64 @@ public class MainTest {
 
         MyInformation myInformationFile = MyInformation.load();
 
-        assert myInformationFile != null;
         assertArrayEquals(myInformation.getMyKeyPair().getMyPublicKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPublicKey().getEncoded());
         assertArrayEquals(myInformation.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
-        assertEquals(myInformation.getMyNonce(), myInformation.getMyNonce());
+        assertEquals(myInformation.getMyNonce(), myInformationFile.getMyNonce());
 
-        MyInformation.deleteFile();
+        Tools.deleteFile(MyInformation.filename);
+    }
+
+    @Test
+    public void testAll() throws GeneralSecurityException, IOException {
+        MyInformation myInformationUser1 = new MyInformation();
+
+        myInformationUser1.incrementMyNonce();
+        myInformationUser1.save();
+
+        MyInformation myInformationFile = MyInformation.load();
+
+        assertArrayEquals(myInformationUser1.getMyKeyPair().getMyPublicKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPublicKey().getEncoded());
+        assertArrayEquals(myInformationUser1.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertEquals(myInformationUser1.getMyNonce(), myInformationFile.getMyNonce());
+
+        int nonceUser2 = 0;
+
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myInformationUser1.getMyNonce(), myInformationUser1.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, nonceUser2, user2.getPublic().getEncoded());
+
+        String message1User1String = Communication.createMessage1(message1User1);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2.getPrivate(), user2.getPublic(), message1User2, message1User1String);
+
+        String message1User2String = Communication.createMessage1(message1User2);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(myInformationUser1.getMyKeyPair().getMyPrivateKey(), myInformationUser1.getMyKeyPair().getMyPublicKey(), message1User1, message1User2String);
+
+        assertTrue(secretBuildUser1.equals(secretBuildUser2));
+
+        String message2User1 = Communication.createMessage2(myInformationUser1.getMyKeyPair().getMyPrivateKey(), secretBuildUser1);
+        String message2User2 = Communication.createMessage2(user2.getPrivate(), secretBuildUser2);
+
+        assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
+        assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
+
+        myInformationUser1.addAConversation(secretBuildUser1);
+        myInformationUser1.incrementMyNonce();
+        myInformationUser1.save();
+
+        assertEquals(1, myInformationUser1.getMyConversations().size());
+
+        String textString = "Another bites the dust";
+        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myInformationUser1.getMyConversations().get(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
+
+        byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
+        assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
+
+        myInformationUser1.deleteAConversation(myInformationUser1.getMyConversations().get(0).getMyNonce());
+        myInformationUser1.save();
+
+        assertEquals(0, myInformationUser1.getMyConversations().size());
+
+        Tools.deleteFile(MyInformation.filename);
+        Tools.deleteFile(MyKeyPair.filename);
     }
 }

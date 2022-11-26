@@ -1,4 +1,6 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.Protocol;
+
+import fr.upec.Prototype_E2EE.Tools;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -136,10 +138,6 @@ public class SecretBuild {
 
     public int getOtherNonce() {
         return otherNonce;
-    }
-
-    public byte[] getMyPubKey() {
-        return myPubKey;
     }
 
     public byte[] getOtherPubKey() {

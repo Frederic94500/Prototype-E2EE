@@ -1,6 +1,6 @@
 package fr.upec.Prototype_E2EE.MyState;
 
-import fr.upec.Prototype_E2EE.SecretBuild;
+import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
@@ -19,7 +19,7 @@ import java.util.Scanner;
  * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  */
 public class MyInformation {
-    private static final String filename = ".MyState";
+    public static final String filename = ".MyState";
     private final MyKeyPair myKeyPair;
     private final List<MyConversation> myConversations;
     private int myNonce;
@@ -58,18 +58,29 @@ public class MyInformation {
             scanner.close();
             String[] dataBase64 = data.split(",");
             if (isEqualsDigest(dataBase64)) {
-                ArrayList<MyConversation> myConversations = new ArrayList<>();
-                for (int i = 2; i < dataBase64.length; i++) {
-                    byte[] aConversation = Tools.toBytes(dataBase64[i]);
-                    myConversations.add(new MyConversation(new SecretBuild(aConversation)));
-                }
-                return new MyInformation(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), myConversations);
+                return new MyInformation(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), getMyConversationsFromBase64(dataBase64));
+            } else {
+                throw new IllegalStateException("Not corresponding Key Pair");
             }
         } else {
             Tools.createFile(filename);
             return new MyInformation();
         }
-        return null;
+    }
+
+    /**
+     * Convert all Conversations Base64 to MyConversation object
+     *
+     * @param dataBase64 MyInformation in Base64
+     * @return Return all Conversations
+     */
+    private static ArrayList<MyConversation> getMyConversationsFromBase64(String[] dataBase64) {
+        ArrayList<MyConversation> myConversations = new ArrayList<>();
+        for (int i = 2; i < dataBase64.length; i++) {
+            byte[] aConversation = Tools.toBytes(dataBase64[i]);
+            myConversations.add(new MyConversation(new SecretBuild(aConversation)));
+        }
+        return myConversations;
     }
 
     /**
@@ -80,13 +91,6 @@ public class MyInformation {
      */
     private static boolean isEqualsDigest(String[] dataBase64) throws IOException, NoSuchAlgorithmException {
         return dataBase64[0].equals(MyKeyPair.digest());
-    }
-
-    /**
-     * Delete this file
-     */
-    public static void deleteFile() {
-        new File(filename).deleteOnExit();
     }
 
     /**
@@ -128,7 +132,7 @@ public class MyInformation {
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
     public void save() throws IOException, NoSuchAlgorithmException {
-        String checksumMyKeyPair = myKeyPair.digest();
+        String checksumMyKeyPair = MyKeyPair.digest();
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
         ArrayList<String> arrayList = new ArrayList<>();
         for (MyConversation myConversation : myConversations) {
@@ -146,6 +150,15 @@ public class MyInformation {
             writer.write(checksumMyKeyPair + "," + myNonceBase64 + "," + allConversations);
             writer.close();
         }
+    }
+
+    /**
+     * Add a new conversation to the list of conversations
+     *
+     * @param secretBuild SecretBuild from the new conversation
+     */
+    public void addAConversation(SecretBuild secretBuild) {
+        myConversations.add(new MyConversation(secretBuild));
     }
 
     /**

@@ -1,6 +1,6 @@
 package fr.upec.Prototype_E2EE.MyState;
 
-import fr.upec.Prototype_E2EE.Keys;
+import fr.upec.Prototype_E2EE.Protocol.Keys;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
@@ -17,7 +17,7 @@ import java.util.Scanner;
  * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  */
 public class MyKeyPair {
-    private static final String filename = ".MyKeyPair";
+    public static final String filename = ".MyKeyPair";
     private final PublicKey myPublicKey;
     private final PrivateKey myPrivateKey;
 
@@ -59,13 +59,6 @@ public class MyKeyPair {
             mkp.save();
             return mkp;
         }
-    }
-
-    /**
-     * Delete this file
-     */
-    public static void deleteFile() {
-        new File(filename).deleteOnExit();
     }
 
     /**

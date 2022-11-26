@@ -1,4 +1,6 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.Protocol;
+
+import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;

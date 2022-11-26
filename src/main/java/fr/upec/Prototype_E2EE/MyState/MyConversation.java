@@ -1,6 +1,6 @@
 package fr.upec.Prototype_E2EE.MyState;
 
-import fr.upec.Prototype_E2EE.SecretBuild;
+import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 
 /**
  * A conversation with the SecretBuild
