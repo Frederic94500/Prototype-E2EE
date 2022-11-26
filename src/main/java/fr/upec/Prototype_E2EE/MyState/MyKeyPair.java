@@ -1,9 +1,14 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.MyState;
+
+import fr.upec.Prototype_E2EE.Keys;
+import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.util.Scanner;
 
@@ -61,6 +66,20 @@ public class MyKeyPair {
      */
     public static void deleteFile() {
         new File(filename).deleteOnExit();
+    }
+
+    /**
+     * Compute the checksum of .MyKeyPair
+     *
+     * @return Return an SHA-512 Checksum
+     */
+    public static String digest() throws IOException, NoSuchAlgorithmException {
+        byte[] digest = MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(Path.of(filename)));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 
     /**

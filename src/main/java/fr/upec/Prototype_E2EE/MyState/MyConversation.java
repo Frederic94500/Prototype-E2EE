@@ -1,4 +1,6 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.MyState;
+
+import fr.upec.Prototype_E2EE.SecretBuild;
 
 /**
  * A conversation with the SecretBuild
@@ -41,5 +43,9 @@ public class MyConversation {
      */
     public int getMyNonce() {
         return mySecretBuild.getMyNonce();
+    }
+
+    public byte[] toBytes() {
+        return mySecretBuild.toBytesWithSymKey();
     }
 }

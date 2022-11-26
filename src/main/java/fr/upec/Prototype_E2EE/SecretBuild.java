@@ -60,6 +60,21 @@ public class SecretBuild {
     }
 
     /**
+     * Constructor to load known information
+     *
+     * @param conversation Known information
+     */
+    public SecretBuild(byte[] conversation) {
+        this.myDate = Tools.toLong(conversation, 0, 8);
+        this.otherDate = Tools.toLong(conversation, 8, 16);
+        this.myNonce = Tools.toInteger(conversation, 16, 20);
+        this.otherNonce = Tools.toInteger(conversation, 20, 24);
+        this.myPubKey = Arrays.copyOfRange(conversation, 24, 115);
+        this.otherPubKey = Arrays.copyOfRange(conversation, 115, 206);
+        this.symKey = Arrays.copyOfRange(conversation, 206, 238);
+    }
+
+    /**
      * Compare between SecretBuild
      *
      * @param other Other SecretBuild
@@ -86,6 +101,24 @@ public class SecretBuild {
         buffer.putInt(otherNonce);
         buffer.put(myPubKey);
         buffer.put(otherPubKey);
+        return buffer.array();
+    }
+
+    /**
+     * Encode SecretBuild with symmetric key
+     *
+     * @return Return SecretBuild as byte[]
+     */
+    public byte[] toBytesWithSymKey() {
+        ByteBuffer buffer = ByteBuffer.allocate(238);
+        buffer.putLong(myDate);
+        buffer.putLong(otherDate);
+        buffer.putInt(myNonce);
+        buffer.putInt(otherNonce);
+        buffer.put(myPubKey);
+        buffer.put(otherPubKey);
+        assert symKey != null;
+        buffer.put(symKey);
         return buffer.array();
     }
 

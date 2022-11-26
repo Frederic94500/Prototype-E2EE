@@ -1,9 +1,12 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.MyState.MyInformation;
+import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
@@ -87,7 +90,7 @@ public class MainTest {
     }
 
     @Test
-    public void testSaveAndLoad() throws GeneralSecurityException, FileNotFoundException {
+    public void testSaveAndLoadMyKeyPair() throws GeneralSecurityException, FileNotFoundException {
         MyKeyPair myKeyPair = MyKeyPair.load(); //Without File
         MyKeyPair myKeyPairViaFile = MyKeyPair.load(); //With File
 
@@ -95,5 +98,20 @@ public class MainTest {
         assertArrayEquals(myKeyPair.getMyPrivateKey().getEncoded(), myKeyPairViaFile.getMyPrivateKey().getEncoded());
 
         MyKeyPair.deleteFile();
+    }
+
+    @Test
+    public void testSaveAndLoadMyInformation() throws GeneralSecurityException, IOException {
+        MyInformation myInformation = new MyInformation();
+        myInformation.save();
+
+        MyInformation myInformationFile = MyInformation.load();
+
+        assert myInformationFile != null;
+        assertArrayEquals(myInformation.getMyKeyPair().getMyPublicKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPublicKey().getEncoded());
+        assertArrayEquals(myInformation.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertEquals(myInformation.getMyNonce(), myInformation.getMyNonce());
+
+        MyInformation.deleteFile();
     }
 }
