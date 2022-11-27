@@ -45,6 +45,11 @@ public class MyConversation {
         return mySecretBuild.getMyNonce();
     }
 
+    /**
+     * Get the Symmetric Key of the Conversation
+     *
+     * @return Return Symmetric Key
+     */
     public byte[] toBytes() {
         return mySecretBuild.toBytesWithSymKey();
     }

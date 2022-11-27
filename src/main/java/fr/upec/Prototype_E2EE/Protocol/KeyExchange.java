@@ -19,7 +19,6 @@ public class KeyExchange {
      * @param salt Salt value (a non-secret random value)
      * @param ikm  Input Keying Material
      * @return Return a PseudoRandom Key
-     * @throws NoSuchAlgorithmException If HmacSHA512 doesn't exist...
      */
     public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA512");
@@ -31,15 +30,13 @@ public class KeyExchange {
 
     /**
      * HMAC Key Derivation Function (HKDF) Expand
-     * This part mainly come from the library HKDF by Patrick Favre-Bulle in <a href="https://github.com/patrickfav/hkdf">GitHub</a>
+     * Based on the library HKDF by Patrick Favre-Bulle in <a href="https://github.com/patrickfav/hkdf">GitHub</a>
      * See <a href="https://www.rfc-editor.org/rfc/rfc5869">RFC5869</a>
      *
      * @param prk  PseudoRandom Key
      * @param info An information
      * @param olb  Out Length Bytes
      * @return Return a HKDF
-     * @throws NoSuchAlgorithmException If HmacSHA512 doesn't exist...
-     * @throws InvalidKeyException      If the key is incorrect
      */
     public static byte[] hkdfExpand(byte[] prk, String info, int olb) throws NoSuchAlgorithmException, InvalidKeyException {
         if (olb <= 0 || prk == null) {

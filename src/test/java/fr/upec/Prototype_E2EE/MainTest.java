@@ -117,6 +117,7 @@ public class MainTest {
 
     @Test
     public void testAll() throws GeneralSecurityException, IOException {
+        //Create MyInformation
         MyInformation myInformationUser1 = new MyInformation();
 
         myInformationUser1.incrementMyNonce();
@@ -128,6 +129,7 @@ public class MainTest {
         assertArrayEquals(myInformationUser1.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
         assertEquals(myInformationUser1.getMyNonce(), myInformationFile.getMyNonce());
 
+        //Create Conversation
         int nonceUser2 = 0;
 
         Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myInformationUser1.getMyNonce(), myInformationUser1.getMyKeyPair().getMyPublicKey().getEncoded());
@@ -146,13 +148,16 @@ public class MainTest {
 
         assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
         assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
+        //End create Conversation
 
+        //Add Conversation to MyInformation
         myInformationUser1.addAConversation(secretBuildUser1);
         myInformationUser1.incrementMyNonce();
         myInformationUser1.save();
 
         assertEquals(1, myInformationUser1.getMyConversations().size());
 
+        //Test cipher/decipher message
         String textString = "Another bites the dust";
         byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myInformationUser1.getMyConversations().get(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
@@ -160,6 +165,7 @@ public class MainTest {
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
         assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
 
+        //Delete a Conversation
         myInformationUser1.deleteAConversation(myInformationUser1.getMyConversations().get(0).getMyNonce());
         myInformationUser1.save();
 
