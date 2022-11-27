@@ -1,7 +1,7 @@
 package fr.upec.Prototype_E2EE;
 
-import fr.upec.Prototype_E2EE.MyState.MyInformation;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
+import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -103,47 +103,47 @@ public class MainTest {
 
     @Test
     public void testSaveAndLoadMyInformation() throws GeneralSecurityException, IOException {
-        MyInformation myInformation = new MyInformation();
-        myInformation.save();
+        MyState myState = new MyState();
+        myState.save();
 
-        MyInformation myInformationFile = MyInformation.load();
+        MyState myStateFile = MyState.load();
 
-        assertArrayEquals(myInformation.getMyKeyPair().getMyPublicKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPublicKey().getEncoded());
-        assertArrayEquals(myInformation.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
-        assertEquals(myInformation.getMyNonce(), myInformationFile.getMyNonce());
+        assertArrayEquals(myState.getMyKeyPair().getMyPublicKey().getEncoded(), myStateFile.getMyKeyPair().getMyPublicKey().getEncoded());
+        assertArrayEquals(myState.getMyKeyPair().getMyPrivateKey().getEncoded(), myStateFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertEquals(myState.getMyNonce(), myStateFile.getMyNonce());
 
-        Tools.deleteFile(MyInformation.filename);
+        Tools.deleteFile(MyState.filename);
     }
 
     @Test
     public void testAll() throws GeneralSecurityException, IOException {
-        //Create MyInformation
-        MyInformation myInformationUser1 = new MyInformation();
+        //Create MyState
+        MyState myStateUser1 = new MyState();
 
-        myInformationUser1.incrementMyNonce();
-        myInformationUser1.save();
+        myStateUser1.incrementMyNonce();
+        myStateUser1.save();
 
-        MyInformation myInformationFile = MyInformation.load();
+        MyState myStateFile = MyState.load();
 
-        assertArrayEquals(myInformationUser1.getMyKeyPair().getMyPublicKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPublicKey().getEncoded());
-        assertArrayEquals(myInformationUser1.getMyKeyPair().getMyPrivateKey().getEncoded(), myInformationFile.getMyKeyPair().getMyPrivateKey().getEncoded());
-        assertEquals(myInformationUser1.getMyNonce(), myInformationFile.getMyNonce());
+        assertArrayEquals(myStateUser1.getMyKeyPair().getMyPublicKey().getEncoded(), myStateFile.getMyKeyPair().getMyPublicKey().getEncoded());
+        assertArrayEquals(myStateUser1.getMyKeyPair().getMyPrivateKey().getEncoded(), myStateFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertEquals(myStateUser1.getMyNonce(), myStateFile.getMyNonce());
 
         //Create Conversation
         int nonceUser2 = 0;
 
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myInformationUser1.getMyNonce(), myInformationUser1.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myStateUser1.getMyNonce(), myStateUser1.getMyKeyPair().getMyPublicKey().getEncoded());
         Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, nonceUser2, user2.getPublic().getEncoded());
 
         String message1User1String = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2.getPrivate(), user2.getPublic(), message1User2, message1User1String);
 
         String message1User2String = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(myInformationUser1.getMyKeyPair().getMyPrivateKey(), myInformationUser1.getMyKeyPair().getMyPublicKey(), message1User1, message1User2String);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(myStateUser1.getMyKeyPair().getMyPrivateKey(), myStateUser1.getMyKeyPair().getMyPublicKey(), message1User1, message1User2String);
 
         assertTrue(secretBuildUser1.equals(secretBuildUser2));
 
-        String message2User1 = Communication.createMessage2(myInformationUser1.getMyKeyPair().getMyPrivateKey(), secretBuildUser1);
+        String message2User1 = Communication.createMessage2(myStateUser1.getMyKeyPair().getMyPrivateKey(), secretBuildUser1);
         String message2User2 = Communication.createMessage2(user2.getPrivate(), secretBuildUser2);
 
         assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
@@ -151,27 +151,27 @@ public class MainTest {
         //End create Conversation
 
         //Add Conversation to MyInformation
-        myInformationUser1.addAConversation(secretBuildUser1);
-        myInformationUser1.incrementMyNonce();
-        myInformationUser1.save();
+        myStateUser1.addAConversation(secretBuildUser1);
+        myStateUser1.incrementMyNonce();
+        myStateUser1.save();
 
-        assertEquals(1, myInformationUser1.getMyConversations().size());
+        assertEquals(1, myStateUser1.getMyConversations().size());
 
         //Test cipher/decipher message
         String textString = "Another bites the dust";
-        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myInformationUser1.getMyConversations().get(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myStateUser1.getMyConversations().get(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
         assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
 
         //Delete a Conversation
-        myInformationUser1.deleteAConversation(myInformationUser1.getMyConversations().get(0).getMyNonce());
-        myInformationUser1.save();
+        myStateUser1.deleteAConversation(myStateUser1.getMyConversations().get(0).getMyNonce());
+        myStateUser1.save();
 
-        assertEquals(0, myInformationUser1.getMyConversations().size());
+        assertEquals(0, myStateUser1.getMyConversations().size());
 
-        Tools.deleteFile(MyInformation.filename);
+        Tools.deleteFile(MyState.filename);
         Tools.deleteFile(MyKeyPair.filename);
     }
 }

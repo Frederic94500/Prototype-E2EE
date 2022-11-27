@@ -15,63 +15,63 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Contain user information
+ * Contain user state
  * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  */
-public class MyInformation {
+public class MyState {
     public static final String filename = ".MyState";
     private final MyKeyPair myKeyPair;
     private final List<MyConversation> myConversations;
     private int myNonce;
 
     /**
-     * Create MyInformation
+     * Create MyState
      */
-    public MyInformation() throws GeneralSecurityException, FileNotFoundException {
+    public MyState() throws GeneralSecurityException, FileNotFoundException {
         this.myKeyPair = MyKeyPair.load();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
     }
 
     /**
-     * Create MyInformation from known information
+     * Create MyState from known information
      *
      * @param myKeyPair       MyKeyPair
      * @param myNonce         MyNonce
      * @param myConversations MyConversations
      */
-    public MyInformation(MyKeyPair myKeyPair, int myNonce, ArrayList<MyConversation> myConversations) {
+    public MyState(MyKeyPair myKeyPair, int myNonce, ArrayList<MyConversation> myConversations) {
         this.myKeyPair = myKeyPair;
         this.myNonce = myNonce;
         this.myConversations = myConversations;
     }
 
     /**
-     * Load or create a MyInformation
+     * Load or create a MyState
      *
-     * @return Return MyInformation
+     * @return Return MyState
      */
-    public static MyInformation load() throws IOException, GeneralSecurityException {
+    public static MyState load() throws IOException, GeneralSecurityException {
         if (Tools.isFileExists(filename)) {
             Scanner scanner = new Scanner(new File(filename));
             String data = scanner.nextLine();
             scanner.close();
             String[] dataBase64 = data.split(",");
             if (isEqualsDigest(dataBase64)) {
-                return new MyInformation(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), getMyConversationsFromBase64(dataBase64));
+                return new MyState(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), getMyConversationsFromBase64(dataBase64));
             } else {
                 throw new IllegalStateException("Not corresponding Key Pair");
             }
         } else {
             Tools.createFile(filename);
-            return new MyInformation();
+            return new MyState();
         }
     }
 
     /**
      * Convert all Conversations Base64 to MyConversation object
      *
-     * @param dataBase64 MyInformation in Base64
+     * @param dataBase64 MyState in Base64
      * @return Return all Conversations
      */
     private static ArrayList<MyConversation> getMyConversationsFromBase64(String[] dataBase64) {
@@ -128,7 +128,7 @@ public class MyInformation {
     }
 
     /**
-     * Save MyInformation in a file
+     * Save MyState in a file
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
     public void save() throws IOException, NoSuchAlgorithmException {
