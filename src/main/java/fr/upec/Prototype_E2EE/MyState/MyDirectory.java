@@ -87,4 +87,42 @@ public class MyDirectory {
         }
         return false;
     }
+
+    /**
+     * Add a person in MyDirectory
+     *
+     * @param name   Name of the person
+     * @param pubKey Public Key of the person
+     */
+    public void addPerson(String name, byte[] pubKey) {
+        directory.put(name, pubKey);
+    }
+
+    /**
+     * Get size of MyDirectory
+     *
+     * @return Return the size of MyDirectory
+     */
+    public int sizeOfDirectory() {
+        return directory.size();
+    }
+
+    /**
+     * Delete a person in MyDirectory
+     *
+     * @param name Name of the person
+     */
+    public void deletePerson(String name) {
+        directory.remove(name);
+    }
+
+    /**
+     * Get the Public Key of a person
+     *
+     * @param name Name of the person
+     * @return Return the Public Key of the person
+     */
+    public byte[] getPerson(String name) {
+        return directory.get(name);
+    }
 }

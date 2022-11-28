@@ -1,5 +1,6 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.MyState.MyDirectory;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.*;
@@ -113,6 +114,33 @@ public class MainTest {
         assertEquals(myState.getMyNonce(), myStateFile.getMyNonce());
 
         Tools.deleteFile(MyState.filename);
+    }
+
+    @Test
+    public void testMyDirectory() throws IOException {
+        MyDirectory myDirectory = new MyDirectory();
+        assertEquals(0, myDirectory.sizeOfDirectory());
+
+        myDirectory.addPerson("user1", user1.getPublic().getEncoded());
+        assertEquals(1, myDirectory.sizeOfDirectory());
+
+        myDirectory.addPerson("user2", user2.getPublic().getEncoded());
+        assertEquals(2, myDirectory.sizeOfDirectory());
+
+        myDirectory.saveIntoFile();
+        MyDirectory myDirectoryFile = new MyDirectory();
+
+        assertTrue(myDirectory.isInDirectory(user1.getPublic().getEncoded()));
+        assertTrue(myDirectoryFile.isInDirectory(myDirectory.getPerson("user2")));
+
+        myDirectory.deletePerson("user2");
+        assertEquals(1, myDirectory.sizeOfDirectory());
+        myDirectory.saveIntoFile();
+
+        MyDirectory myDirectoryFile2 = new MyDirectory();
+        assertEquals(1, myDirectoryFile2.sizeOfDirectory());
+
+        Tools.deleteFile(MyDirectory.filename);
     }
 
     @Test
