@@ -4,11 +4,11 @@ import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +20,14 @@ import java.util.Scanner;
  */
 public class MyState {
     public static final String filename = ".MyState";
-    private final MyKeyPair myKeyPair;
     private final List<MyConversation> myConversations;
+    private MyKeyPair myKeyPair;
     private int myNonce;
 
     /**
      * Create MyState
      */
-    public MyState() throws GeneralSecurityException, FileNotFoundException {
+    public MyState() throws GeneralSecurityException, IOException {
         this.myKeyPair = MyKeyPair.load();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
@@ -132,6 +132,7 @@ public class MyState {
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
     public void save() throws IOException, NoSuchAlgorithmException {
+        myKeyPair.save();
         String checksumMyKeyPair = MyKeyPair.digest();
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
         ArrayList<String> arrayList = new ArrayList<>();
@@ -173,5 +174,14 @@ public class MyState {
                 break;
             }
         }
+    }
+
+    /**
+     * Replace MyKeyPair by a new one and save the new one
+     */
+    public void replaceMyKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException {
+        this.myKeyPair = new MyKeyPair();
+        this.myKeyPair.save();
+        this.save();
     }
 }

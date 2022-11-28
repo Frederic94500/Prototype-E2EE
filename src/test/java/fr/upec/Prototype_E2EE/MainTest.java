@@ -4,16 +4,17 @@ import fr.upec.Prototype_E2EE.MyState.MyDirectory;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.*;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +28,13 @@ public class MainTest {
     public static void setupClass() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         user1 = Keys.generate();
         user2 = Keys.generate();
+    }
+
+    @After
+    public void deleteFiles() {
+        Tools.deleteFile(MyState.filename);
+        Tools.deleteFile(MyKeyPair.filename);
+        Tools.deleteFile(MyDirectory.filename);
     }
 
     @Test
@@ -92,19 +100,17 @@ public class MainTest {
     }
 
     @Test
-    public void testSaveAndLoadMyKeyPair() throws GeneralSecurityException, FileNotFoundException {
+    public void testSaveAndLoadMyKeyPair() throws GeneralSecurityException, IOException {
         MyKeyPair myKeyPair = MyKeyPair.load(); //Without File
         MyKeyPair myKeyPairViaFile = MyKeyPair.load(); //With File
 
         assertArrayEquals(myKeyPair.getMyPublicKey().getEncoded(), myKeyPairViaFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myKeyPair.getMyPrivateKey().getEncoded(), myKeyPairViaFile.getMyPrivateKey().getEncoded());
-
-        Tools.deleteFile(MyKeyPair.filename);
     }
 
     @Test
-    public void testSaveAndLoadMyInformation() throws GeneralSecurityException, IOException {
-        MyState myState = new MyState();
+    public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException {
+        MyState myState = MyState.load();
         myState.save();
 
         MyState myStateFile = MyState.load();
@@ -112,8 +118,6 @@ public class MainTest {
         assertArrayEquals(myState.getMyKeyPair().getMyPublicKey().getEncoded(), myStateFile.getMyKeyPair().getMyPublicKey().getEncoded());
         assertArrayEquals(myState.getMyKeyPair().getMyPrivateKey().getEncoded(), myStateFile.getMyKeyPair().getMyPrivateKey().getEncoded());
         assertEquals(myState.getMyNonce(), myStateFile.getMyNonce());
-
-        Tools.deleteFile(MyState.filename);
     }
 
     @Test
@@ -139,14 +143,25 @@ public class MainTest {
 
         MyDirectory myDirectoryFile2 = new MyDirectory();
         assertEquals(1, myDirectoryFile2.sizeOfDirectory());
+    }
 
-        Tools.deleteFile(MyDirectory.filename);
+    @Test
+    public void testReplaceMyKeyPair() throws GeneralSecurityException, IOException {
+        MyState myState = MyState.load();
+        myState.save();
+        MyState myStateFile = MyState.load();
+        String digestFile = MyKeyPair.digest();
+
+        myState.replaceMyKeyPair();
+
+        assertFalse(Arrays.equals(myStateFile.getMyKeyPair().getMyPublicKey().getEncoded(), myState.getMyKeyPair().getMyPublicKey().getEncoded()));
+        assertNotEquals(digestFile, MyKeyPair.digest());
     }
 
     @Test
     public void testAll() throws GeneralSecurityException, IOException {
         //Create MyState
-        MyState myStateUser1 = new MyState();
+        MyState myStateUser1 = MyState.load();
 
         myStateUser1.incrementMyNonce();
         myStateUser1.save();
@@ -198,8 +213,5 @@ public class MainTest {
         myStateUser1.save();
 
         assertEquals(0, myStateUser1.getMyConversations().size());
-
-        Tools.deleteFile(MyState.filename);
-        Tools.deleteFile(MyKeyPair.filename);
     }
 }
