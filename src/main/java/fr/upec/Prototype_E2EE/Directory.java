@@ -73,7 +73,27 @@ public class Directory {
         }
         return false;
     }
-    public static void saveIntoDirectory(){
+    public static HashMap<String, byte[]> readFile()throws IOException{
+        File file=new File("directory.txt");
+        HashMap<String, byte[]> map = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String str=line;
+                String [] tab=str.split(":");
+                //System.out.println(tab[0]+"et "+tab[1]);
+                byte[] decodedBytes = Base64.getDecoder().decode(tab[0]);
+                String decodedString = new String(decodedBytes);
+                //System.out.println(decodedString+":jovial");
+                byte[] decodedBytesvalue= Base64.getDecoder().decode(tab[1]);
+                String decodedBytesString=new String(decodedBytesvalue);
+                //System.out.println(decodedBytesString+":okok");
+                //System.out.println(decodedString+"<>"+decodedBytesString);
+
+                map.put(decodedString,decodedBytesvalue);
+            }
+            return map;
+        }
 
     }
 }
