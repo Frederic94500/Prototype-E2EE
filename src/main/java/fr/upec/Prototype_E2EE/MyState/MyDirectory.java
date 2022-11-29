@@ -25,24 +25,21 @@ public class MyDirectory {
      */
     public HashMap<String, byte[]> readFile() throws IOException {
         HashMap<String, byte[]> map = new HashMap<>();
-        if (Tools.isFileExists(filename)) {
-            File file = new File(filename);
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] tab = line.split(":");
-                    String decodedName = new String(Tools.toBytes(tab[0]));
-                    byte[] decodedPubKey = Tools.toBytes(tab[1]);
-
-                    map.put(decodedName, decodedPubKey);
-                }
-                br.close();
-                return map;
-            }
-        } else {
+        if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
-            return map;
         }
+        File file = new File(filename);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tab = line.split(":");
+                String decodedName = new String(Tools.toBytes(tab[0]));
+                byte[] decodedPubKey = Tools.toBytes(tab[1]);
+
+                map.put(decodedName, decodedPubKey);
+            }
+        }
+        return map;
     }
 
     /**

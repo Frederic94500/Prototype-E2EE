@@ -51,10 +51,7 @@ public class MyKeyPair {
             String[] dataBase64 = data.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {
-            Tools.createFile(filename);
-            MyKeyPair mkp = new MyKeyPair();
-            mkp.save();
-            return mkp;
+            return new MyKeyPair();
         }
     }
 

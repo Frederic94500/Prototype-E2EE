@@ -6,7 +6,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 /**
  * KeyExchange for the key negotiation/agreement
@@ -82,7 +85,7 @@ public class KeyExchange {
      * @param publicKeyOther Public Key of the other person
      * @return Return the shared key
      */
-    public static Key createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static SecretKey createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(publicKeyOther, true);

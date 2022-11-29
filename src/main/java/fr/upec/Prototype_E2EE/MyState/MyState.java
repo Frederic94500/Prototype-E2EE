@@ -29,7 +29,7 @@ public class MyState {
      * Create MyState
      */
     public MyState() throws GeneralSecurityException, IOException {
-        this.myKeyPair = MyKeyPair.load();
+        this.myKeyPair = new MyKeyPair();
         this.myDirectory = new MyDirectory();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
@@ -121,6 +121,15 @@ public class MyState {
      */
     public List<MyConversation> getMyConversations() {
         return myConversations;
+    }
+
+    /**
+     * Get MyDirectory
+     *
+     * @return Return MyDirectory
+     */
+    public MyDirectory getMyDirectory() {
+        return myDirectory;
     }
 
     /**
