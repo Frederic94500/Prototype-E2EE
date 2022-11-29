@@ -4,11 +4,11 @@ import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,15 +20,17 @@ import java.util.Scanner;
  */
 public class MyState {
     public static final String filename = ".MyState";
-    private final MyKeyPair myKeyPair;
+    private final MyDirectory myDirectory;
     private final List<MyConversation> myConversations;
+    private MyKeyPair myKeyPair;
     private int myNonce;
 
     /**
      * Create MyState
      */
-    public MyState() throws GeneralSecurityException, FileNotFoundException {
-        this.myKeyPair = MyKeyPair.load();
+    public MyState() throws GeneralSecurityException, IOException {
+        this.myKeyPair = new MyKeyPair();
+        this.myDirectory = new MyDirectory();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
     }
@@ -40,8 +42,9 @@ public class MyState {
      * @param myNonce         MyNonce
      * @param myConversations MyConversations
      */
-    public MyState(MyKeyPair myKeyPair, int myNonce, ArrayList<MyConversation> myConversations) {
+    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, int myNonce, ArrayList<MyConversation> myConversations) {
         this.myKeyPair = myKeyPair;
+        this.myDirectory = myDirectory;
         this.myNonce = myNonce;
         this.myConversations = myConversations;
     }
@@ -58,7 +61,7 @@ public class MyState {
             scanner.close();
             String[] dataBase64 = data.split(",");
             if (isEqualsDigest(dataBase64)) {
-                return new MyState(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), getMyConversationsFromBase64(dataBase64));
+                return new MyState(MyKeyPair.load(), new MyDirectory(), ByteBuffer.wrap(Tools.toBytes(dataBase64[2])).getInt(), getMyConversationsFromBase64(dataBase64));
             } else {
                 throw new IllegalStateException("Not corresponding Key Pair");
             }
@@ -76,7 +79,7 @@ public class MyState {
      */
     private static ArrayList<MyConversation> getMyConversationsFromBase64(String[] dataBase64) {
         ArrayList<MyConversation> myConversations = new ArrayList<>();
-        for (int i = 2; i < dataBase64.length; i++) {
+        for (int i = 3; i < dataBase64.length; i++) {
             byte[] aConversation = Tools.toBytes(dataBase64[i]);
             myConversations.add(new MyConversation(new SecretBuild(aConversation)));
         }
@@ -84,13 +87,13 @@ public class MyState {
     }
 
     /**
-     * Verify is the digest of .MyKeyPair is the same
+     * Verify if the digest of .MyKeyPair and .MyDirectory is the same
      *
-     * @param dataBase64 Digest of the file
+     * @param dataBase64 Data in Base64
      * @return Return a Boolean
      */
     private static boolean isEqualsDigest(String[] dataBase64) throws IOException, NoSuchAlgorithmException {
-        return dataBase64[0].equals(MyKeyPair.digest());
+        return dataBase64[0].equals(Tools.digest(MyKeyPair.filename)) && dataBase64[1].equals(Tools.digest(MyDirectory.filename));
     }
 
     /**
@@ -121,6 +124,15 @@ public class MyState {
     }
 
     /**
+     * Get MyDirectory
+     *
+     * @return Return MyDirectory
+     */
+    public MyDirectory getMyDirectory() {
+        return myDirectory;
+    }
+
+    /**
      * Increment myNonce
      */
     public void incrementMyNonce() throws NoSuchAlgorithmException {
@@ -132,7 +144,10 @@ public class MyState {
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
     public void save() throws IOException, NoSuchAlgorithmException {
-        String checksumMyKeyPair = MyKeyPair.digest();
+        myKeyPair.save();
+        myDirectory.saveIntoFile();
+        String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
+        String checksumMyDirectory = Tools.digest(MyDirectory.filename);
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
         ArrayList<String> arrayList = new ArrayList<>();
         for (MyConversation myConversation : myConversations) {
@@ -140,16 +155,12 @@ public class MyState {
         }
         String allConversations = String.join(",", arrayList);
 
-        if (Tools.isFileExists(filename)) {
-            FileWriter writer = new FileWriter(filename);
-            writer.write(checksumMyKeyPair + "," + myNonceBase64 + "," + allConversations);
-            writer.close();
-        } else {
+        if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
-            FileWriter writer = new FileWriter(filename);
-            writer.write(checksumMyKeyPair + "," + myNonceBase64 + "," + allConversations);
-            writer.close();
         }
+        FileWriter writer = new FileWriter(filename);
+        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + myNonceBase64 + "," + allConversations);
+        writer.close();
     }
 
     /**
@@ -173,5 +184,14 @@ public class MyState {
                 break;
             }
         }
+    }
+
+    /**
+     * Replace MyKeyPair by a new one and save the new one
+     */
+    public void replaceMyKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException {
+        this.myKeyPair = new MyKeyPair();
+        this.myKeyPair.save();
+        this.save();
     }
 }

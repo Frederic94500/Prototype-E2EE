@@ -4,11 +4,8 @@ import fr.upec.Prototype_E2EE.Protocol.Keys;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.*;
 import java.util.Scanner;
 
@@ -46,7 +43,7 @@ public class MyKeyPair {
      *
      * @return Return a MyKeyPair
      */
-    public static MyKeyPair load() throws GeneralSecurityException, FileNotFoundException {
+    public static MyKeyPair load() throws GeneralSecurityException, IOException {
         if (Tools.isFileExists(filename)) {
             Scanner scanner = new Scanner(new File(filename));
             String data = scanner.nextLine();
@@ -54,25 +51,8 @@ public class MyKeyPair {
             String[] dataBase64 = data.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {
-            Tools.createFile(filename);
-            MyKeyPair mkp = new MyKeyPair();
-            mkp.save();
-            return mkp;
+            return new MyKeyPair();
         }
-    }
-
-    /**
-     * Compute the checksum of .MyKeyPair
-     *
-     * @return Return an SHA-512 Checksum
-     */
-    public static String digest() throws IOException, NoSuchAlgorithmException {
-        byte[] digest = MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(Path.of(filename)));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 
     /**
@@ -96,19 +76,14 @@ public class MyKeyPair {
     /**
      * Save MyKeyPair
      */
-    private void save() {
+    void save() throws IOException {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
         String myPrivateKeyBase64 = Tools.toBase64(myPrivateKey.getEncoded());
-        if (Tools.isFileExists(filename)) {
-            try {
-                FileWriter writer = new FileWriter(filename);
-                writer.write(myPublicKeyBase64 + "," + myPrivateKeyBase64);
-                writer.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            throw new IllegalStateException();
+        if (!Tools.isFileExists(filename)) {
+            Tools.createFile(filename);
         }
+        FileWriter writer = new FileWriter(filename);
+        writer.write(myPublicKeyBase64 + "," + myPrivateKeyBase64);
+        writer.close();
     }
 }
