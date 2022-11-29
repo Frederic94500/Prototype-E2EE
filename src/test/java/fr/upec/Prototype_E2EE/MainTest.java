@@ -117,7 +117,7 @@ public class MainTest {
     }
 
     @Test
-    public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException { //Maybe bug?
+    public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException {
         MyState myState = new MyState();
         myState.save();
 

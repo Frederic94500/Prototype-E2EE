@@ -146,16 +146,12 @@ public class MyState {
         }
         String allConversations = String.join(",", arrayList);
 
-        if (Tools.isFileExists(filename)) {
-            FileWriter writer = new FileWriter(filename);
-            writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + myNonceBase64 + "," + allConversations);
-            writer.close();
-        } else {
+        if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
-            FileWriter writer = new FileWriter(filename);
-            writer.write(checksumMyKeyPair + "," + myNonceBase64 + "," + allConversations);
-            writer.close();
         }
+        FileWriter writer = new FileWriter(filename);
+        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + myNonceBase64 + "," + allConversations);
+        writer.close();
     }
 
     /**

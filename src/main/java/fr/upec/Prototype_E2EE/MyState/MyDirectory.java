@@ -49,12 +49,10 @@ public class MyDirectory {
      * Save MyDirectory to a file
      */
     public void saveIntoFile() throws IOException {
-        if (Tools.isFileExists(filename)) {
-            writeToFile();
-        } else {
+        if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
-            writeToFile();
         }
+        writeToFile();
     }
 
     /**
