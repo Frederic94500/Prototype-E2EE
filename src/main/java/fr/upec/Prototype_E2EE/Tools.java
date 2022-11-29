@@ -133,7 +133,7 @@ public class Tools {
      * Delete a file
      */
     public static void deleteFile(String filename) {
-        new File(filename).deleteOnExit();
+        new File(filename).delete();
     }
 
     /**

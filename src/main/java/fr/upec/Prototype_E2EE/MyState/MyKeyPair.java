@@ -76,7 +76,7 @@ public class MyKeyPair {
     /**
      * Save MyKeyPair
      */
-    void save() throws IOException {
+    public void save() throws IOException {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
         String myPrivateKeyBase64 = Tools.toBase64(myPrivateKey.getEncoded());
         if (!Tools.isFileExists(filename)) {

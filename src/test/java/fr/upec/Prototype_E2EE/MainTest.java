@@ -111,6 +111,7 @@ public class MainTest {
     @Test
     public void testSaveAndLoadMyKeyPair() throws GeneralSecurityException, IOException {
         MyKeyPair myKeyPair = MyKeyPair.load(); //Without File
+        myKeyPair.save();
         MyKeyPair myKeyPairViaFile = MyKeyPair.load(); //With File
 
         assertArrayEquals(myKeyPair.getMyPublicKey().getEncoded(), myKeyPairViaFile.getMyPublicKey().getEncoded());
