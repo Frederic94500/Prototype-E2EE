@@ -5,6 +5,7 @@ import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.*;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -28,6 +29,13 @@ public class MainTest {
     public static void setupClass() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         user1 = Keys.generate();
         user2 = Keys.generate();
+    }
+
+    @Before
+    public void deleteFilesBefore() {
+        Tools.deleteFile(MyState.filename);
+        Tools.deleteFile(MyKeyPair.filename);
+        Tools.deleteFile(MyDirectory.filename);
     }
 
     @After
@@ -109,8 +117,8 @@ public class MainTest {
     }
 
     @Test
-    public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException {
-        MyState myState = MyState.load();
+    public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException { //Maybe bug?
+        MyState myState = new MyState();
         myState.save();
 
         MyState myStateFile = MyState.load();
@@ -147,15 +155,15 @@ public class MainTest {
 
     @Test
     public void testReplaceMyKeyPair() throws GeneralSecurityException, IOException {
-        MyState myState = MyState.load();
+        MyState myState = new MyState();
         myState.save();
         MyState myStateFile = MyState.load();
-        String digestFile = MyKeyPair.digest();
+        String digestFile = Tools.digest(MyKeyPair.filename);
 
         myState.replaceMyKeyPair();
 
         assertFalse(Arrays.equals(myStateFile.getMyKeyPair().getMyPublicKey().getEncoded(), myState.getMyKeyPair().getMyPublicKey().getEncoded()));
-        assertNotEquals(digestFile, MyKeyPair.digest());
+        assertNotEquals(digestFile, Tools.digest(MyKeyPair.filename));
     }
 
     @Test

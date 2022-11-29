@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MyDirectory {
     public final static String filename = ".MyDirectory";
-    private HashMap<String, byte[]> directory;
+    private final HashMap<String, byte[]> directory;
 
     /**
      * Constructor MyDirectory
@@ -23,7 +23,7 @@ public class MyDirectory {
      *
      * @return Return HashMap
      */
-    public static HashMap<String, byte[]> readFile() throws IOException {
+    public HashMap<String, byte[]> readFile() throws IOException {
         HashMap<String, byte[]> map = new HashMap<>();
         if (Tools.isFileExists(filename)) {
             File file = new File(filename);
@@ -40,6 +40,7 @@ public class MyDirectory {
                 return map;
             }
         } else {
+            Tools.createFile(filename);
             return map;
         }
     }

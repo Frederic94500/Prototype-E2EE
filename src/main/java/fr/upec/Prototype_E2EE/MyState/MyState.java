@@ -20,6 +20,7 @@ import java.util.Scanner;
  */
 public class MyState {
     public static final String filename = ".MyState";
+    private final MyDirectory myDirectory;
     private final List<MyConversation> myConversations;
     private MyKeyPair myKeyPair;
     private int myNonce;
@@ -29,6 +30,7 @@ public class MyState {
      */
     public MyState() throws GeneralSecurityException, IOException {
         this.myKeyPair = MyKeyPair.load();
+        this.myDirectory = new MyDirectory();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
     }
@@ -40,8 +42,9 @@ public class MyState {
      * @param myNonce         MyNonce
      * @param myConversations MyConversations
      */
-    public MyState(MyKeyPair myKeyPair, int myNonce, ArrayList<MyConversation> myConversations) {
+    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, int myNonce, ArrayList<MyConversation> myConversations) {
         this.myKeyPair = myKeyPair;
+        this.myDirectory = myDirectory;
         this.myNonce = myNonce;
         this.myConversations = myConversations;
     }
@@ -58,7 +61,7 @@ public class MyState {
             scanner.close();
             String[] dataBase64 = data.split(",");
             if (isEqualsDigest(dataBase64)) {
-                return new MyState(MyKeyPair.load(), ByteBuffer.wrap(Tools.toBytes(dataBase64[1])).getInt(), getMyConversationsFromBase64(dataBase64));
+                return new MyState(MyKeyPair.load(), new MyDirectory(), ByteBuffer.wrap(Tools.toBytes(dataBase64[2])).getInt(), getMyConversationsFromBase64(dataBase64));
             } else {
                 throw new IllegalStateException("Not corresponding Key Pair");
             }
@@ -76,7 +79,7 @@ public class MyState {
      */
     private static ArrayList<MyConversation> getMyConversationsFromBase64(String[] dataBase64) {
         ArrayList<MyConversation> myConversations = new ArrayList<>();
-        for (int i = 2; i < dataBase64.length; i++) {
+        for (int i = 3; i < dataBase64.length; i++) {
             byte[] aConversation = Tools.toBytes(dataBase64[i]);
             myConversations.add(new MyConversation(new SecretBuild(aConversation)));
         }
@@ -84,13 +87,13 @@ public class MyState {
     }
 
     /**
-     * Verify is the digest of .MyKeyPair is the same
+     * Verify if the digest of .MyKeyPair and .MyDirectory is the same
      *
-     * @param dataBase64 Digest of the file
+     * @param dataBase64 Data in Base64
      * @return Return a Boolean
      */
     private static boolean isEqualsDigest(String[] dataBase64) throws IOException, NoSuchAlgorithmException {
-        return dataBase64[0].equals(MyKeyPair.digest());
+        return dataBase64[0].equals(Tools.digest(MyKeyPair.filename)) && dataBase64[1].equals(Tools.digest(MyDirectory.filename));
     }
 
     /**
@@ -133,7 +136,9 @@ public class MyState {
      */
     public void save() throws IOException, NoSuchAlgorithmException {
         myKeyPair.save();
-        String checksumMyKeyPair = MyKeyPair.digest();
+        myDirectory.saveIntoFile();
+        String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
+        String checksumMyDirectory = Tools.digest(MyDirectory.filename);
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
         ArrayList<String> arrayList = new ArrayList<>();
         for (MyConversation myConversation : myConversations) {
@@ -143,7 +148,7 @@ public class MyState {
 
         if (Tools.isFileExists(filename)) {
             FileWriter writer = new FileWriter(filename);
-            writer.write(checksumMyKeyPair + "," + myNonceBase64 + "," + allConversations);
+            writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + myNonceBase64 + "," + allConversations);
             writer.close();
         } else {
             Tools.createFile(filename);

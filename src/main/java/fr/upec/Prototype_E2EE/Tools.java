@@ -6,6 +6,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -132,5 +134,19 @@ public class Tools {
      */
     public static void deleteFile(String filename) {
         new File(filename).deleteOnExit();
+    }
+
+    /**
+     * Compute the checksum of a file
+     *
+     * @return Return an SHA-512 Checksum
+     */
+    public static String digest(String filename) throws IOException, NoSuchAlgorithmException {
+        byte[] digest = MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(Path.of(filename)));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }

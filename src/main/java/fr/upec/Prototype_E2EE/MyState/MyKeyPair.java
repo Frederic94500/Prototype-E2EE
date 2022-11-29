@@ -6,8 +6,6 @@ import fr.upec.Prototype_E2EE.Tools;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.*;
 import java.util.Scanner;
 
@@ -58,20 +56,6 @@ public class MyKeyPair {
             mkp.save();
             return mkp;
         }
-    }
-
-    /**
-     * Compute the checksum of .MyKeyPair
-     *
-     * @return Return an SHA-512 Checksum
-     */
-    public static String digest() throws IOException, NoSuchAlgorithmException {
-        byte[] digest = MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(Path.of(filename)));
-        StringBuilder sb = new StringBuilder();
-        for (byte b : digest) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
     }
 
     /**
