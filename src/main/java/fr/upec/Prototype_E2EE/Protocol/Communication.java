@@ -1,7 +1,6 @@
-package fr.upec.Prototype_E2EE;
+package fr.upec.Prototype_E2EE.Protocol;
 
 import java.security.GeneralSecurityException;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
@@ -33,10 +32,12 @@ public class Communication {
      * Handle the message 1 received from other
      * otherMessage1 (Base64) -> Message1
      *
+     * @param myPrivateKey  My Private Key
+     * @param myPublicKey   My Public Key
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
      */
-    public static SecretBuild handleMessage1(KeyPair myKeyPair, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
+    public static SecretBuild handleMessage1(PrivateKey myPrivateKey, PublicKey myPublicKey, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
         byte[] otherMessage1Bytes = toBytes(otherMessage1);
 
         //int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
@@ -44,16 +45,14 @@ public class Communication {
         int otherNonce = toInteger(otherMessage1Bytes, 8, 12);
         byte[] otherPubKeyByte = copyOfRange(otherMessage1Bytes, 12, 103);
 
-        //Need to retrieve my pub key
-        PrivateKey myPrivKey = myKeyPair.getPrivate(); //Same as pub key -> UNSAFE
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(myPrivKey, otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+        byte[] symKey = KeyExchange.createSharedKey(myPrivateKey, otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
         return new SecretBuild((System.currentTimeMillis() / 1000L),
                 otherTimestamp,
                 myMessage1.getNonce(),
                 otherNonce,
-                myKeyPair.getPublic().getEncoded(),
+                myPublicKey.getEncoded(),
                 otherPubKeyByte,
                 symKey);
     }
@@ -66,9 +65,10 @@ public class Communication {
      * @param mySecretBuild Your SecretBuild
      * @return Return the signed and ciphered message 2 as Base64
      */
-    public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws Exception {
+    public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String message2Base64 = toBase64(mySecretBuild.toBytesWithoutSymKey());
 
+        //Need to have an ID verification in Android
         byte[] signedMessage = Sign.sign(myPrivateKey, message2Base64);
         byte[] cipheredSignedMessage = MessageCipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
 
@@ -83,7 +83,7 @@ public class Communication {
      * @param otherMessage2 Message 2 received by other
      * @return Return a boolean if the message 2 is authentic
      */
-    public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws Exception {
+    public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild);
         byte[] otherSecretBuildBytes = otherSecretBuild.toBytesWithoutSymKey();
 
