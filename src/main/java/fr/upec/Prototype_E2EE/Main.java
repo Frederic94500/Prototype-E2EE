@@ -1,7 +1,10 @@
 package fr.upec.Prototype_E2EE;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws GeneralSecurityException, IOException {
         //class directory:hashmap(nom,pubkey:string) <---jsonfile
         // ,verifier si dans annuaire il y une clé
         //scéanario
@@ -16,7 +19,7 @@ public class Main {
 
 
         // MyState1() MyState2()
-        //
-
+        InterfacePanel start = new InterfacePanel();
+        
     }
 }
