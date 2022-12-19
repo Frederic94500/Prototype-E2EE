@@ -136,7 +136,11 @@ public class MyState {
      * Increment myNonce
      */
     public void incrementMyNonce() throws NoSuchAlgorithmException {
-        this.myNonce += Tools.generateSecureRandom().nextInt(100);
+        int temp;
+        do {
+            temp = Tools.generateSecureRandom().nextInt(100);
+        } while (temp == 0);
+        this.myNonce += temp;
     }
 
     /**
