@@ -35,12 +35,15 @@ public class InterfacePanel {
     }
 
     public void MyIdentity() throws GeneralSecurityException, IOException {
-        Scanner sc = new Scanner(System.in);
 
+        Scanner sc = new Scanner(System.in);
+        System.out.println("0-retour");
+        System.out.println("1-afficher pubkey");
+        System.out.println("2-remplacer pubkey");
         int e = sc.nextInt();
         if (e == 0) {
-            new InterfacePanel();
-        } else {
+            new InterfacePanel();//retour arriere
+        } else if (e == 1) {
             System.out.println("-----BEGIN RSA PUBLIC KEY-----");
             PublicKey pubKey = user.getMyKeyPair().getMyPublicKey();
             byte[] pubKey_byte = pubKey.getEncoded();
@@ -48,12 +51,10 @@ public class InterfacePanel {
             System.out.println(str_key.length());
             System.out.println(str_key);
             System.out.println("-----END RSA PUBLIC KEY-----");
+        } else if (e == 2) {
+            user.replaceMyKeyPair();
         }
 
-
-    }
-
-    public void manageDirectory() {
 
     }
 
@@ -62,6 +63,28 @@ public class InterfacePanel {
     }
 
     public void listConversation() {
+
+    }
+
+    public void manageDirectory() throws GeneralSecurityException, IOException {
+
+        System.out.println("0-retour");
+        System.out.println("1-ajouter une personne");
+        System.out.println("2-supprimer une personne");
+        Scanner sc = new Scanner(System.in);
+        int e = sc.nextInt();
+        if (e == 0) {
+            new InterfacePanel();//retour arriere
+        } else if (e == 1) {
+
+            //user.getMyDirectory().addPerson();
+            System.out.println("pas encore défini");
+
+        } else if (e == 2) {
+            Scanner s = new Scanner(System.in);
+            String se = sc.nextLine();
+            user.getMyDirectory().deletePerson(se);
+        }
 
     }
 
