@@ -101,6 +101,8 @@ public class Communication {
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
         byte[] signedMessage = MessageCipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
 
-        return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, toBase64(otherSecretBuildBytes));
+        PublicKey otherPublicKey = toPublicKey(mySecretBuild.getOtherPubKey());
+        String otherSecretBuildBase64 = toBase64(otherSecretBuildBytes);
+        return Sign.verify(otherPublicKey, signedMessage, otherSecretBuildBase64);
     }
 }
