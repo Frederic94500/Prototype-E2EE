@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws GeneralSecurityException, IOException {
         MyState myState = MyState.load();
-        MainMenu.mainMenu(new Scanner(System.in), myState);
+        new MainMenu().menu(new Scanner(System.in), myState);
 
         myState.save();
     }

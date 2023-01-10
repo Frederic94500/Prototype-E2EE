@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class MainMenu {
-    public static void mainMenu(Scanner scanner, MyState myState) {
+public class MainMenu implements InterfaceCLI {
+    public void menu(Scanner scanner, MyState myState) {
         boolean cli = true;
         boolean typing;
         int input = 0;
