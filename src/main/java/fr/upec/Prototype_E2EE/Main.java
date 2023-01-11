@@ -1,5 +1,7 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.CLI.InterfacePanel;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -20,6 +22,6 @@ public class Main {
 
         // MyState1() MyState2()
         InterfacePanel start = new InterfacePanel();
-        
+
     }
 }

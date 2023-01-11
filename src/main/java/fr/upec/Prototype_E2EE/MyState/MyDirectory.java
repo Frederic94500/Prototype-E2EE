@@ -93,7 +93,7 @@ public class MyDirectory {
     public void addPerson(String name, byte[] pubKey) {
         directory.put(name, pubKey);
     }
-
+    
     /**
      * Get size of MyDirectory
      *

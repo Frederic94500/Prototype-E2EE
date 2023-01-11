@@ -3,6 +3,7 @@ package fr.upec.Prototype_E2EE.CLI;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.Message1;
 import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
+import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -93,9 +94,11 @@ public class InterfacePanel {
         if (e == 0) {
             new InterfacePanel();//retour arriere
         } else if (e == 1) {
-            //string name scanner.string
-            //
-            //user.getMyDirectory().addPerson(name,pubkey);
+            Scanner sc1 = new Scanner(System.in);
+            String name = sc1.next();
+            String pubkey = sc1.next();
+            byte[] pubkey_Byte = Tools.toBytes(pubkey);
+            user.getMyDirectory().addPerson(name, pubkey_Byte);
             System.out.println("pas encore défini");
 
         } else if (e == 2) {
