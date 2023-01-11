@@ -103,6 +103,4 @@ public class Communication {
 
         return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, toBase64(otherSecretBuildBytes));
     }
-
-    ;
 }
