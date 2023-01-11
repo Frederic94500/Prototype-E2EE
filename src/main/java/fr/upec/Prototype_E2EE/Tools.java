@@ -12,6 +12,8 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -148,5 +150,32 @@ public class Tools {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    /**
+     * Get user input for option in CLI
+     *
+     * @param scanner Scanner for user input
+     * @param max     Maximum number for option
+     * @return Return the number of the option
+     */
+    public static int getInput(Scanner scanner, int max) {
+        boolean typing = true;
+        int input = 0;
+
+        while (typing) {
+            try {
+                System.out.print("Type your command: ");
+                input = scanner.nextInt();
+                if (0 <= input && input <= max) {
+                    typing = false;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Error! Unrecognized command!");
+                scanner.next();
+            }
+        }
+
+        return input;
     }
 }
