@@ -13,7 +13,7 @@ public class MainMenu implements InterfaceCLI {
         int input = 0;
         HashMap<Integer, InterfaceCLI> commands = new HashMap<>();
 
-        commands.put(1, new MenuMyIdentity());
+        commands.put(1, new MyIdentityMenu());
         while (cli) {
             typing = true;
             System.out.println("""
