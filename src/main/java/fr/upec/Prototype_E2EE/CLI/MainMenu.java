@@ -3,6 +3,8 @@ package fr.upec.Prototype_E2EE.CLI;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Tools;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -14,12 +16,12 @@ public class MainMenu implements InterfaceCLI {
      * @param myState User Information
      */
     @Override
-    public void menu(Scanner scanner, MyState myState) {
+    public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         boolean cli = true;
         int input;
         HashMap<Integer, InterfaceCLI> commands = new HashMap<>();
 
-        commands.put(1, new MyIdentityMenu());
+        commands.put(3, new MyIdentityMenu());
         while (cli) {
             System.out.println("""
                     ========== Main Menu ==========
@@ -29,7 +31,7 @@ public class MainMenu implements InterfaceCLI {
                     | 3 - My identity
                     | 4 - My directory
                     ===============================""");
-            input = Tools.getInput(scanner, commands.size());
+            input = Tools.getInput(scanner, /*commands.size()*/ 4);
 
             if (input == 0) {
                 cli = false;
