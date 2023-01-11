@@ -36,7 +36,7 @@ public class MainTest {
     }
 
     @After
-    public void deleteFiles() {
+    public void deleteFilesAfter() {
         Tools.deleteFile(MyState.filename);
         Tools.deleteFile(MyKeyPair.filename);
         Tools.deleteFile(MyDirectory.filename);

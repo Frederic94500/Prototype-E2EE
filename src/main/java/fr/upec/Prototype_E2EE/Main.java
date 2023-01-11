@@ -1,27 +1,17 @@
 package fr.upec.Prototype_E2EE;
 
-import fr.upec.Prototype_E2EE.CLI.InterfacePanel;
+import fr.upec.Prototype_E2EE.CLI.MainMenu;
+import fr.upec.Prototype_E2EE.MyState.MyState;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws GeneralSecurityException, IOException {
-        //class directory:hashmap(nom,pubkey:string) <---jsonfile
-        // ,verifier si dans annuaire il y une clé
-        //scéanario
-        // users1 ->>>>> users2
-        // enregistrer clé public de la personne dans l'annuaire les 2
-        // createmessage1(pubkey,salt  ,   heure ) les 2 cotés;
-        //prendre en charge le message  :generate  symkey
-        //createmessage2 //sign and cipher secretbuild
-        // handlemessage2 user2
+        MyState myState = MyState.load();
+        new MainMenu().menu(new Scanner(System.in), myState);
 
-        // send message
-
-
-        // MyState1() MyState2()
-        InterfacePanel start = new InterfacePanel();
-
+        myState.save();
     }
 }
