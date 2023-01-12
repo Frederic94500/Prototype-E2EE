@@ -178,4 +178,40 @@ public class Tools {
 
         return input;
     }
+
+    /**
+     * Get user input
+     *
+     * @param scanner  Scanner for user input
+     * @param sentence Sentence for the input
+     * @return Return user input
+     */
+    public static String getInput(Scanner scanner, String sentence) {
+        System.out.print(sentence);
+
+        String input = scanner.next();
+        if (input.equals("0")) {
+            return "00"; //Avoid Base64 error
+        }
+        return input;
+    }
+
+    /**
+     * Verify if the Public Key is an EC key
+     *
+     * @param pubKey EC Public Key
+     * @return Return if is EC Key
+     */
+    public static boolean isECPubKey(byte[] pubKey) {
+        try {
+            toPublicKey(pubKey);
+        } catch (GeneralSecurityException e) {
+            if (new String(pubKey).equals("00")) {
+                return false;
+            }
+            System.out.println("Not a Public Key!");
+            return false;
+        }
+        return true;
+    }
 }

@@ -9,7 +9,12 @@ import java.security.PublicKey;
 import java.util.Scanner;
 
 public class MyIdentityMenu implements InterfaceCLI {
-    private static void getMyPubKey(MyState myState) {
+    /**
+     * Show my Public Key
+     *
+     * @param myState User information
+     */
+    private void showMyPubKey(MyState myState) {
         System.out.println("Here is your public key:\n");
         System.out.println("-----BEGIN EC PUBLIC KEY-----");
         PublicKey pubKey = myState.getMyKeyPair().getMyPublicKey();
@@ -19,6 +24,12 @@ public class MyIdentityMenu implements InterfaceCLI {
         System.out.println("-----END EC PUBLIC KEY-----\n");
     }
 
+    /**
+     * Menu for Identity
+     *
+     * @param scanner Scanner user input
+     * @param myState User information
+     */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         boolean cli = true;
@@ -36,7 +47,7 @@ public class MyIdentityMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
-                getMyPubKey(myState);
+                showMyPubKey(myState);
             } else if (input == 2) {
                 myState.replaceMyKeyPair();
                 myState.save();

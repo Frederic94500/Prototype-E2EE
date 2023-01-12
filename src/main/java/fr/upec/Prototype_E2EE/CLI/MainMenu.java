@@ -22,6 +22,7 @@ public class MainMenu implements InterfaceCLI {
         HashMap<Integer, InterfaceCLI> commands = new HashMap<>();
 
         commands.put(3, new MyIdentityMenu());
+        commands.put(4, new MyDirectoryMenu());
         while (cli) {
             System.out.println("""
                     ========== Main Menu ==========

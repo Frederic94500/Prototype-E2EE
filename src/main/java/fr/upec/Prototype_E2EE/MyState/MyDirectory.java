@@ -85,6 +85,16 @@ public class MyDirectory {
     }
 
     /**
+     * Search in Directory if the key is present
+     *
+     * @param key The key entry
+     * @return Return a boolean if it is present
+     */
+    public boolean isInDirectory(String key) {
+        return directory.containsKey(key);
+    }
+
+    /**
      * Add a person in MyDirectory
      *
      * @param name   Name of the person
@@ -120,5 +130,18 @@ public class MyDirectory {
      */
     public byte[] getPerson(String name) {
         return directory.get(name);
+    }
+
+    /**
+     * Show Directory
+     *
+     * @return Return the Directory
+     */
+    public String showDirectory() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+            sb.append(entry.getKey()).append(" : ").append(Tools.toBase64(entry.getValue())).append("\n");
+        }
+        return sb.toString();
     }
 }

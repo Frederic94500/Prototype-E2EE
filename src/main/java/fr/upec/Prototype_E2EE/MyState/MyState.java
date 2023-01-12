@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +65,9 @@ public class MyState {
                 throw new IllegalStateException("Not corresponding Key Pair");
             }
         } else {
-            Tools.createFile(filename);
-            return new MyState();
+            MyState myState = new MyState();
+            myState.save();
+            return myState;
         }
     }
 
@@ -147,7 +147,7 @@ public class MyState {
      * Save MyState in a file
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
-    public void save() throws IOException, NoSuchAlgorithmException {
+    public void save() throws IOException, GeneralSecurityException {
         myKeyPair.save();
         myDirectory.saveIntoFile();
         String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
@@ -193,7 +193,7 @@ public class MyState {
     /**
      * Replace MyKeyPair by a new one and save the new one
      */
-    public void replaceMyKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException {
+    public void replaceMyKeyPair() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
         this.myKeyPair.save();
         this.save();
