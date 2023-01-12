@@ -20,7 +20,17 @@ class ToMessage2 {
     }
 }
 
+/**
+ * Start a new Conversation Menu for CLI
+ */
 public class StartConversationMenu implements InterfaceCLI {
+    /**
+     * Menu for the Message 1
+     *
+     * @param scanner User input
+     * @param myState User information
+     * @return Return ToMessage2
+     */
     private ToMessage2 message1(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
         Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce(), myState.getMyKeyPair().getMyPublicKey().getEncoded());
         myState.incrementMyNonce();
@@ -45,6 +55,14 @@ public class StartConversationMenu implements InterfaceCLI {
         return new ToMessage2(true, secretBuild);
     }
 
+    /**
+     * Menu for the Message 2
+     *
+     * @param scanner       User input
+     * @param myState       User information
+     * @param mySecretBuild Information for a conversation
+     * @return Return a boolean if it is correct
+     */
     private boolean message2(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String myMessage2 = Communication.createMessage2(myState.getMyKeyPair().getMyPrivateKey(), mySecretBuild);
         System.out.println("Please copy the Message 2 and transfer to your recipient: ");
@@ -61,6 +79,12 @@ public class StartConversationMenu implements InterfaceCLI {
         return true;
     }
 
+    /**
+     * Menu to start a Conversation
+     *
+     * @param scanner User input
+     * @param myState User information
+     */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         ToMessage2 toMessage2 = message1(scanner, myState);

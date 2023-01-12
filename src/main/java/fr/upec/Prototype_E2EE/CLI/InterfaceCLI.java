@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
+/**
+ * Interface for CLI
+ */
 @FunctionalInterface
 public interface InterfaceCLI {
     void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException;

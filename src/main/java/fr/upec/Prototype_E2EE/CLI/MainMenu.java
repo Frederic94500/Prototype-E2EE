@@ -8,6 +8,9 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Scanner;
 
+/**
+ * Main Menu for CLI
+ */
 public class MainMenu implements InterfaceCLI {
     /**
      * Main Menu for CLI

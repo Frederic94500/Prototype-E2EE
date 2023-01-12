@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
+/**
+ * My Directory Menu for CLI
+ */
 public class MyDirectoryMenu implements InterfaceCLI {
     /**
      * Show Directory

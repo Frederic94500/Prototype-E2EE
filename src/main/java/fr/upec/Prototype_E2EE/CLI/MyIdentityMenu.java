@@ -8,6 +8,9 @@ import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Scanner;
 
+/**
+ * My Identity Menu for CLI
+ */
 public class MyIdentityMenu implements InterfaceCLI {
     /**
      * Show my Public Key
