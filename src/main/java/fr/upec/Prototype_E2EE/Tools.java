@@ -22,6 +22,15 @@ import static java.util.Arrays.copyOfRange;
  */
 public class Tools {
     /**
+     * Get the current time as UNIX Timestamp
+     *
+     * @return Return UNIX Timestamp
+     */
+    public static Long getCurrentTime() {
+        return System.currentTimeMillis() / 1000L;
+    }
+
+    /**
      * Encode bytes to String Base64
      *
      * @param in Bytes

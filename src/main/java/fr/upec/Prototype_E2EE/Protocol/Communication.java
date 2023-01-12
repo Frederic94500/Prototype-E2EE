@@ -48,6 +48,10 @@ public class Communication {
     public static SecretBuild handleMessage1(MyState myState, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
         byte[] otherMessage1Bytes = toBytes(otherMessage1);
 
+        if (otherMessage1Bytes.length != 103) {
+            throw new IllegalArgumentException("The other Message 1 is not the expected size!");
+        }
+
         long otherTimestamp = toLong(otherMessage1Bytes, 0, 8);
         int otherNonce = toInteger(otherMessage1Bytes, 8, 12);
         byte[] otherPubKeyByte = copyOfRange(otherMessage1Bytes, 12, 103);
@@ -59,7 +63,7 @@ public class Communication {
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
         byte[] symKey = KeyExchange.createSharedKey(myState.getMyKeyPair().getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
-        return new SecretBuild((System.currentTimeMillis() / 1000L),
+        return new SecretBuild(myMessage1.getTimestamp(),
                 otherTimestamp,
                 myMessage1.getNonce(),
                 otherNonce,
@@ -95,7 +99,7 @@ public class Communication {
      * @return Return a boolean if the message 2 is authentic
      */
     public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
-        SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild);
+        SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild); //Swap information without symKey
         byte[] otherSecretBuildBytes = otherSecretBuild.toBytesWithoutSymKey();
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);

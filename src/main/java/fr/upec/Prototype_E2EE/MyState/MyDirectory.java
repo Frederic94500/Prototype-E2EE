@@ -144,4 +144,21 @@ public class MyDirectory {
         }
         return sb.toString();
     }
+
+    /**
+     * Get Key name in directory
+     *
+     * @param otherPubKey Other Public Key
+     * @return Return the Key name or null if it does not found
+     */
+    public String getKeyName(byte[] otherPubKey) {
+        if (isInDirectory(otherPubKey)) {
+            for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+                if (Arrays.equals(otherPubKey, entry.getValue())) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
 }

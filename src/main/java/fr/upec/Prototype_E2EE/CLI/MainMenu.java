@@ -21,6 +21,7 @@ public class MainMenu implements InterfaceCLI {
         int input;
         HashMap<Integer, InterfaceCLI> commands = new HashMap<>();
 
+        commands.put(1, new StartConversationMenu());
         commands.put(3, new MyIdentityMenu());
         commands.put(4, new MyDirectoryMenu());
         while (cli) {
