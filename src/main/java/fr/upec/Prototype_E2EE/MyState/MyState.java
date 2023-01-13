@@ -181,13 +181,24 @@ public class MyState {
      *
      * @param nonce myNonce
      */
-    public void deleteAConversation(int nonce) {
+    public void deleteAConversation(int nonce) throws GeneralSecurityException, IOException {
         for (int i = 0; i < myConversations.size(); i++) {
             if (myConversations.get(i).getMyNonce() == nonce) {
                 myConversations.remove(i);
+                save();
                 break;
             }
         }
+    }
+
+    /**
+     * Delete a conversation
+     *
+     * @param conversation Conversation to delete
+     */
+    public void deleteAConversation(MyConversation conversation) throws GeneralSecurityException, IOException {
+        myConversations.remove(conversation);
+        save();
     }
 
     /**
@@ -197,5 +208,24 @@ public class MyState {
         this.myKeyPair = new MyKeyPair();
         this.myKeyPair.save();
         this.save();
+    }
+
+    /**
+     * Get the size of conversation
+     *
+     * @return Return the size of conversation
+     */
+    public int getConversationSize() {
+        return myConversations.size();
+    }
+
+    /**
+     * Get a conversation
+     *
+     * @param index Index to get
+     * @return Return a conversation
+     */
+    public MyConversation getConversation(int index) {
+        return myConversations.get(index);
     }
 }

@@ -25,6 +25,7 @@ public class MainMenu implements InterfaceCLI {
         HashMap<Integer, InterfaceCLI> commands = new HashMap<>();
 
         commands.put(1, new StartConversationMenu());
+        commands.put(2, new ConversationsMenu());
         commands.put(3, new MyIdentityMenu());
         commands.put(4, new MyDirectoryMenu());
         while (cli) {
@@ -36,7 +37,7 @@ public class MainMenu implements InterfaceCLI {
                     | 3 - My identity
                     | 4 - My directory
                     ===============================""");
-            input = Tools.getInput(scanner, /*commands.size()*/ 4);
+            input = Tools.getInput(scanner, commands.size());
 
             if (input == 0) {
                 cli = false;
