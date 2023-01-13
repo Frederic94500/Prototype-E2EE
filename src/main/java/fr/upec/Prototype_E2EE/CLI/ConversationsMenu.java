@@ -63,7 +63,7 @@ public class ConversationsMenu implements InterfaceCLI {
 
         do {
             input = Tools.getInput(scanner, "Please type your message to cipher (0 = return back):\n");
-            if (input.equals("00")) {
+            if (input.equals("0")) {
                 cli = false;
             } else {
                 byte[] cipheredMessageByte = MessageCipher.cipher(secretKey, input.getBytes(StandardCharsets.UTF_8));
@@ -86,7 +86,7 @@ public class ConversationsMenu implements InterfaceCLI {
 
         do {
             input = Tools.getInput(scanner, "Please paste the message to decipher (0 = return back):\n");
-            if (input.equals("00")) {
+            if (input.equals("0")) {
                 cli = false;
             } else {
                 byte[] decipheredMessageByte = MessageCipher.decipher(secretKey, Tools.toBytes(input));

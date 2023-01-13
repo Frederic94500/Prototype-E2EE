@@ -200,7 +200,7 @@ public class Tools {
 
         String input = scanner.next();
         if (input.equals("0")) {
-            return "00"; //Avoid Base64 error
+            return "0";
         }
         return input;
     }
@@ -215,7 +215,7 @@ public class Tools {
         try {
             toPublicKey(pubKey);
         } catch (GeneralSecurityException e) {
-            if (new String(pubKey).equals("00")) {
+            if (new String(pubKey).equals("0")) {
                 return false;
             }
             System.out.println("Not a Public Key!");

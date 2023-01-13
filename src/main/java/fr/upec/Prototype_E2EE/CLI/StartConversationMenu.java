@@ -42,7 +42,7 @@ public class StartConversationMenu implements InterfaceCLI {
         SecretBuild secretBuild = null;
         do {
             inputOtherMessage1 = Tools.getInput(scanner, "Please paste the Message 1 from your sender (0 = return back): \n");
-            if (inputOtherMessage1.equals("00")) {
+            if (inputOtherMessage1.equals("0")) {
                 return new ToMessage2(false, null);
             }
             try {
@@ -71,7 +71,7 @@ public class StartConversationMenu implements InterfaceCLI {
         String input;
         do {
             input = Tools.getInput(scanner, "Please paste the Message 2 from your sender (0 = return back): \n");
-            if (input.equals("00")) {
+            if (input.equals("0")) {
                 return false;
             }
         } while (!Communication.handleMessage2(mySecretBuild, input));

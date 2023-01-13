@@ -36,12 +36,15 @@ public class MyDirectoryMenu implements InterfaceCLI {
      */
     private void addPerson(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         String name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
-        if (!name.equals("00")) {
+        if (!name.equals("0")) {
             String pubKey;
             do {
                 pubKey = Tools.getInput(scanner, "Public Key of the person (0 = return back): ");
-            } while (!Tools.isECPubKey(Tools.toBytes(pubKey)) && !pubKey.equals("00"));
-            if (!pubKey.equals("00")) {
+                if (pubKey.equals("0")) {
+                    break;
+                }
+            } while (!Tools.isECPubKey(Tools.toBytes(pubKey)));
+            if (!pubKey.equals("0")) {
                 byte[] pubKeyByte = Tools.toBytes(pubKey);
                 myState.getMyDirectory().addPerson(name, pubKeyByte);
                 myState.save();
@@ -66,8 +69,11 @@ public class MyDirectoryMenu implements InterfaceCLI {
             String input;
             do {
                 input = Tools.getInput(scanner, "Enter the name to delete (0 = return back): ");
-            } while (!myState.getMyDirectory().isInDirectory(input) && !input.equals("00"));
-            if (!input.equals("00")) {
+                if (input.equals("0")) {
+                    break;
+                }
+            } while (!myState.getMyDirectory().isInDirectory(input));
+            if (!input.equals("0")) {
                 myState.getMyDirectory().deletePerson(input);
                 myState.save();
                 System.out.println("The person " + input + " has been deleted!");
