@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class MyState {
      * Create MyState
      */
     public MyState() throws GeneralSecurityException, IOException {
-        this.myKeyPair = MyKeyPair.load();
+        this.myKeyPair = new MyKeyPair();
         this.myDirectory = new MyDirectory();
         this.myNonce = 0;
         this.myConversations = new ArrayList<>();
@@ -66,8 +65,9 @@ public class MyState {
                 throw new IllegalStateException("Not corresponding Key Pair");
             }
         } else {
-            Tools.createFile(filename);
-            return new MyState();
+            MyState myState = new MyState();
+            myState.save();
+            return myState;
         }
     }
 
@@ -124,17 +124,30 @@ public class MyState {
     }
 
     /**
+     * Get MyDirectory
+     *
+     * @return Return MyDirectory
+     */
+    public MyDirectory getMyDirectory() {
+        return myDirectory;
+    }
+
+    /**
      * Increment myNonce
      */
     public void incrementMyNonce() throws NoSuchAlgorithmException {
-        this.myNonce += Tools.generateSecureRandom().nextInt(100);
+        int temp;
+        do {
+            temp = Tools.generateSecureRandom().nextInt(100);
+        } while (temp == 0);
+        this.myNonce += temp;
     }
 
     /**
      * Save MyState in a file
      * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
      */
-    public void save() throws IOException, NoSuchAlgorithmException {
+    public void save() throws IOException, GeneralSecurityException {
         myKeyPair.save();
         myDirectory.saveIntoFile();
         String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
@@ -168,21 +181,51 @@ public class MyState {
      *
      * @param nonce myNonce
      */
-    public void deleteAConversation(int nonce) {
+    public void deleteAConversation(int nonce) throws GeneralSecurityException, IOException {
         for (int i = 0; i < myConversations.size(); i++) {
             if (myConversations.get(i).getMyNonce() == nonce) {
                 myConversations.remove(i);
+                save();
                 break;
             }
         }
     }
 
     /**
+     * Delete a conversation
+     *
+     * @param conversation Conversation to delete
+     */
+    public void deleteAConversation(MyConversation conversation) throws GeneralSecurityException, IOException {
+        myConversations.remove(conversation);
+        save();
+    }
+
+    /**
      * Replace MyKeyPair by a new one and save the new one
      */
-    public void replaceMyKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException, IOException {
+    public void replaceMyKeyPair() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
         this.myKeyPair.save();
         this.save();
+    }
+
+    /**
+     * Get the size of conversation
+     *
+     * @return Return the size of conversation
+     */
+    public int getConversationSize() {
+        return myConversations.size();
+    }
+
+    /**
+     * Get a conversation
+     *
+     * @param index Index to get
+     * @return Return a conversation
+     */
+    public MyConversation getConversation(int index) {
+        return myConversations.get(index);
     }
 }

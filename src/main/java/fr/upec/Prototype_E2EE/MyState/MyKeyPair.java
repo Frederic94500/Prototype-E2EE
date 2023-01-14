@@ -51,10 +51,7 @@ public class MyKeyPair {
             String[] dataBase64 = data.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {
-            Tools.createFile(filename);
-            MyKeyPair mkp = new MyKeyPair();
-            mkp.save();
-            return mkp;
+            return new MyKeyPair();
         }
     }
 
@@ -79,7 +76,7 @@ public class MyKeyPair {
     /**
      * Save MyKeyPair
      */
-    void save() throws IOException {
+    public void save() throws IOException {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
         String myPrivateKeyBase64 = Tools.toBase64(myPrivateKey.getEncoded());
         if (!Tools.isFileExists(filename)) {

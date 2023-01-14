@@ -12,6 +12,8 @@ import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -19,6 +21,15 @@ import static java.util.Arrays.copyOfRange;
  * Some tools...
  */
 public class Tools {
+    /**
+     * Get the current time as UNIX Timestamp
+     *
+     * @return Return UNIX Timestamp
+     */
+    public static Long getCurrentTime() {
+        return System.currentTimeMillis() / 1000L;
+    }
+
     /**
      * Encode bytes to String Base64
      *
@@ -133,7 +144,7 @@ public class Tools {
      * Delete a file
      */
     public static void deleteFile(String filename) {
-        new File(filename).deleteOnExit();
+        new File(filename).delete();
     }
 
     /**
@@ -148,5 +159,68 @@ public class Tools {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+
+    /**
+     * Get user input for option in CLI
+     *
+     * @param scanner Scanner for user input
+     * @param max     Maximum number for option
+     * @return Return the number of the option
+     */
+    public static int getInput(Scanner scanner, int max) {
+        boolean typing = true;
+        int input = 0;
+
+        while (typing) {
+            try {
+                System.out.print("Type your command: ");
+                input = scanner.nextInt();
+                if (0 <= input && input <= max) {
+                    typing = false;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Error! Unrecognized command!");
+                scanner.next();
+            }
+        }
+
+        return input;
+    }
+
+    /**
+     * Get user input
+     *
+     * @param scanner  Scanner for user input
+     * @param sentence Sentence for the input
+     * @return Return user input
+     */
+    public static String getInput(Scanner scanner, String sentence) {
+        System.out.print(sentence);
+
+        String input = scanner.next();
+        if (input.equals("0")) {
+            return "0";
+        }
+        return input;
+    }
+
+    /**
+     * Verify if the Public Key is an EC key
+     *
+     * @param pubKey EC Public Key
+     * @return Return if is EC Key
+     */
+    public static boolean isECPubKey(byte[] pubKey) {
+        try {
+            toPublicKey(pubKey);
+        } catch (GeneralSecurityException e) {
+            if (new String(pubKey).equals("0")) {
+                return false;
+            }
+            System.out.println("Not a Public Key!");
+            return false;
+        }
+        return true;
     }
 }

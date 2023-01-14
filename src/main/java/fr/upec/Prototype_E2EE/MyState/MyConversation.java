@@ -53,4 +53,13 @@ public class MyConversation {
     public byte[] toBytes() {
         return mySecretBuild.toBytesWithSymKey();
     }
+
+    /**
+     * Get the Other Public Key from SecretBuild
+     *
+     * @return Return the Other Public Key
+     */
+    public byte[] getOtherPubKey() {
+        return mySecretBuild.getOtherPubKey();
+    }
 }

@@ -1,5 +1,7 @@
 package fr.upec.Prototype_E2EE.Protocol;
 
+import fr.upec.Prototype_E2EE.MyState.MyState;
+
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -12,18 +14,25 @@ import static java.util.Arrays.copyOfRange;
  */
 public class Communication {
     /**
-     * Create message 1 for the key negotiation/agreement
+     * Create Message1 for the key negotiation/agreement
      * Message1 -> Base64
      *
      * @param publicKey Your Public Key
      * @param salt      A salt number, a counter of message
-     * @return Return the message 1 as Base64
+     * @return Return Message1 as Base64
      */
     public static String createMessage1(PublicKey publicKey, int salt) {
         Message1 message1 = new Message1(System.currentTimeMillis() / 1000L, salt, publicKey.getEncoded());
         return toBase64(message1.toBytes());
     }
 
+    /**
+     * Create Message1 for the key negotiation/agreement
+     * Message1 -> Base64
+     *
+     * @param message1 Message1 object
+     * @return Return Message1 as Base64
+     */
     public static String createMessage1(Message1 message1) {
         return toBase64(message1.toBytes());
     }
@@ -32,27 +41,33 @@ public class Communication {
      * Handle the message 1 received from other
      * otherMessage1 (Base64) -> Message1
      *
-     * @param myPrivateKey  My Private Key
-     * @param myPublicKey   My Public Key
+     * @param myState       Object MyState
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
      */
-    public static SecretBuild handleMessage1(PrivateKey myPrivateKey, PublicKey myPublicKey, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
+    public static SecretBuild handleMessage1(MyState myState, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
         byte[] otherMessage1Bytes = toBytes(otherMessage1);
 
-        //int myNonce = 1; //Need to check if nonce is superior to the old message and increment every new message
+        if (otherMessage1Bytes.length != 103) {
+            throw new IllegalArgumentException("The other Message 1 is not the expected size!");
+        }
+
         long otherTimestamp = toLong(otherMessage1Bytes, 0, 8);
         int otherNonce = toInteger(otherMessage1Bytes, 8, 12);
         byte[] otherPubKeyByte = copyOfRange(otherMessage1Bytes, 12, 103);
 
-        PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(myPrivateKey, otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+        if (!myState.getMyDirectory().isInDirectory(otherPubKeyByte)) {
+            throw new IllegalArgumentException("This public key is not in the directory!");
+        }
 
-        return new SecretBuild((System.currentTimeMillis() / 1000L),
+        PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
+        byte[] symKey = KeyExchange.createSharedKey(myState.getMyKeyPair().getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+
+        return new SecretBuild(myMessage1.getTimestamp(),
                 otherTimestamp,
                 myMessage1.getNonce(),
                 otherNonce,
-                myPublicKey.getEncoded(),
+                myState.getMyKeyPair().getMyPublicKey().getEncoded(),
                 otherPubKeyByte,
                 symKey);
     }
@@ -84,12 +99,14 @@ public class Communication {
      * @return Return a boolean if the message 2 is authentic
      */
     public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
-        SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild);
+        SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild); //Swap information without symKey
         byte[] otherSecretBuildBytes = otherSecretBuild.toBytesWithoutSymKey();
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
         byte[] signedMessage = MessageCipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
 
-        return Sign.verify(toPublicKey(mySecretBuild.getOtherPubKey()), signedMessage, toBase64(otherSecretBuildBytes));
+        PublicKey otherPublicKey = toPublicKey(mySecretBuild.getOtherPubKey());
+        String otherSecretBuildBase64 = toBase64(otherSecretBuildBytes);
+        return Sign.verify(otherPublicKey, signedMessage, otherSecretBuildBase64);
     }
 }

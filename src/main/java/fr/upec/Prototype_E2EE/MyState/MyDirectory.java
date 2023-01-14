@@ -25,24 +25,21 @@ public class MyDirectory {
      */
     public HashMap<String, byte[]> readFile() throws IOException {
         HashMap<String, byte[]> map = new HashMap<>();
-        if (Tools.isFileExists(filename)) {
-            File file = new File(filename);
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] tab = line.split(":");
-                    String decodedName = new String(Tools.toBytes(tab[0]));
-                    byte[] decodedPubKey = Tools.toBytes(tab[1]);
-
-                    map.put(decodedName, decodedPubKey);
-                }
-                br.close();
-                return map;
-            }
-        } else {
+        if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
-            return map;
         }
+        File file = new File(filename);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tab = line.split(":");
+                String decodedName = new String(Tools.toBytes(tab[0]));
+                byte[] decodedPubKey = Tools.toBytes(tab[1]);
+
+                map.put(decodedName, decodedPubKey);
+            }
+        }
+        return map;
     }
 
     /**
@@ -88,6 +85,16 @@ public class MyDirectory {
     }
 
     /**
+     * Search in Directory if the key is present
+     *
+     * @param key The key entry
+     * @return Return a boolean if it is present
+     */
+    public boolean isInDirectory(String key) {
+        return directory.containsKey(key);
+    }
+
+    /**
      * Add a person in MyDirectory
      *
      * @param name   Name of the person
@@ -123,5 +130,35 @@ public class MyDirectory {
      */
     public byte[] getPerson(String name) {
         return directory.get(name);
+    }
+
+    /**
+     * Show Directory
+     *
+     * @return Return the Directory
+     */
+    public String showDirectory() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+            sb.append(entry.getKey()).append(" : ").append(Tools.toBase64(entry.getValue())).append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Get Key name in directory
+     *
+     * @param otherPubKey Other Public Key
+     * @return Return the Key name or null if it does not found
+     */
+    public String getKeyName(byte[] otherPubKey) {
+        if (isInDirectory(otherPubKey)) {
+            for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+                if (Arrays.equals(otherPubKey, entry.getValue())) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
     }
 }
