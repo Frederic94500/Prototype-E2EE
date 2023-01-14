@@ -11,6 +11,13 @@ import java.util.Scanner;
  * My Directory Menu for CLI
  */
 public class MyDirectoryMenu implements InterfaceCLI {
+    public static String keyParser(String keyPem) {
+        String[] tokens = keyPem.split("-----");
+        System.out.println(tokens[1]);
+        return tokens[1];
+
+    }
+
     /**
      * Show Directory
      *

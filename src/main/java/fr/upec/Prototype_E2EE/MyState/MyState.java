@@ -96,12 +96,6 @@ public class MyState {
         return dataBase64[0].equals(Tools.digest(MyKeyPair.filename)) && dataBase64[1].equals(Tools.digest(MyDirectory.filename));
     }
 
-    public static String keyParser(String keyPem) {
-        String[] tokens = keyPem.split("-----");
-        System.out.println(tokens[1]);
-        return tokens[1];
-
-    }
 
     /**
      * Get MyKeyPair

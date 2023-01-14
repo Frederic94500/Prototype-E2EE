@@ -223,4 +223,11 @@ public class Tools {
         }
         return true;
     }
+
+    public static String keyParser(String keyPem) {
+        String[] tokens = keyPem.split("-----");
+        System.out.println(tokens[1]);
+        return tokens[1];
+
+    }
 }
