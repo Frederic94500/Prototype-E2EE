@@ -20,7 +20,7 @@ public class MyIdentityMenu implements InterfaceCLI {
     private void showMyPubKey(MyState myState) {
         System.out.println("Here is your public key:\n");
         System.out.println("-----BEGIN EC PUBLIC KEY-----");
-        PublicKey pubKey = myState.getMyKeyPair().getMyPublicKey();
+        PublicKey pubKey = myState.getMyPublicKey();
         byte[] pubKeyByte = pubKey.getEncoded();
         String str_key = Tools.toBase64(pubKeyByte);
         System.out.println(str_key);

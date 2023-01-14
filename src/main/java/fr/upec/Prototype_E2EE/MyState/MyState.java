@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -97,12 +99,21 @@ public class MyState {
     }
 
     /**
-     * Get MyKeyPair
+     * Get my Public Key from MyKeyPair
      *
-     * @return Return MyKeyPair
+     * @return Return my Public Key
      */
-    public MyKeyPair getMyKeyPair() {
-        return myKeyPair;
+    public PublicKey getMyPublicKey() {
+        return myKeyPair.getMyPublicKey();
+    }
+
+    /**
+     * Get my Private Key from MyKeyPair
+     *
+     * @return Return my Private Key
+     */
+    public PrivateKey getMyPrivateKey() {
+        return myKeyPair.getMyPrivateKey();
     }
 
     /**

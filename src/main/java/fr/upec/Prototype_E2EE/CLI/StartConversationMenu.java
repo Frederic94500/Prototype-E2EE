@@ -32,7 +32,7 @@ public class StartConversationMenu implements InterfaceCLI {
      * @return Return ToMessage2
      */
     private ToMessage2 message1(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
-        Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce(), myState.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce(), myState.getMyPublicKey().getEncoded());
         myState.incrementMyNonce();
         myState.save();
         System.out.println("Please copy the Message 1 and transfer to your recipient:");
@@ -64,7 +64,7 @@ public class StartConversationMenu implements InterfaceCLI {
      * @return Return a boolean if it is correct
      */
     private boolean message2(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
-        String myMessage2 = Communication.createMessage2(myState.getMyKeyPair().getMyPrivateKey(), mySecretBuild);
+        String myMessage2 = Communication.createMessage2(myState.getMyPrivateKey(), mySecretBuild);
         System.out.println("Please copy the Message 2 and transfer to your recipient: ");
         System.out.println(myMessage2 + "\n");
 

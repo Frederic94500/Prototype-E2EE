@@ -61,13 +61,13 @@ public class Communication {
         }
 
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(myState.getMyKeyPair().getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+        byte[] symKey = KeyExchange.createSharedKey(myState.getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
         return new SecretBuild(myMessage1.getTimestamp(),
                 otherTimestamp,
                 myMessage1.getNonce(),
                 otherNonce,
-                myState.getMyKeyPair().getMyPublicKey().getEncoded(),
+                myState.getMyPublicKey().getEncoded(),
                 otherPubKeyByte,
                 symKey);
     }

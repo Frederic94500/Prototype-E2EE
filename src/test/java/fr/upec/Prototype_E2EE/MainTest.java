@@ -44,14 +44,14 @@ public class MainTest {
 
     @Test
     public void testMessage1() throws GeneralSecurityException {
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyKeyPair().getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyPublicKey().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
 
-        user2.getMyDirectory().addPerson("user1", user1.getMyKeyPair().getMyPublicKey().getEncoded());
+        user2.getMyDirectory().addPerson("user1", user1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
 
-        user1.getMyDirectory().addPerson("user2", user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        user1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
         SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2For1);
 
@@ -66,14 +66,14 @@ public class MainTest {
 
     @Test
     public void testMessage2() throws Exception {
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyKeyPair().getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyPublicKey().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
 
-        user2.getMyDirectory().addPerson("user1", user1.getMyKeyPair().getMyPublicKey().getEncoded());
+        user2.getMyDirectory().addPerson("user1", user1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
 
-        user1.getMyDirectory().addPerson("user2", user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        user1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
         SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2For1);
 
@@ -81,8 +81,8 @@ public class MainTest {
         sbUser1 = secretBuildUser1;
         sbUser2 = secretBuildUser2;
 
-        String message2User1 = Communication.createMessage2(user1.getMyKeyPair().getMyPrivateKey(), secretBuildUser1);
-        String message2User2 = Communication.createMessage2(user2.getMyKeyPair().getMyPrivateKey(), secretBuildUser2);
+        String message2User1 = Communication.createMessage2(user1.getMyPrivateKey(), secretBuildUser1);
+        String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
         assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
         assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
@@ -91,11 +91,11 @@ public class MainTest {
     @Test
     public void testSigningVerifying() throws GeneralSecurityException {
         String textString = "Around the World, Around the World";
-        byte[] signatureUser1 = Sign.sign(user1.getMyKeyPair().getMyPrivateKey(), textString);
+        byte[] signatureUser1 = Sign.sign(user1.getMyPrivateKey(), textString);
         String signatureBase64User1 = Tools.toBase64(signatureUser1);
 
         byte[] signatureFromUser1 = Tools.toBytes(signatureBase64User1);
-        assertTrue(Sign.verify(user1.getMyKeyPair().getMyPublicKey(), signatureFromUser1, textString));
+        assertTrue(Sign.verify(user1.getMyPublicKey(), signatureFromUser1, textString));
     }
 
     @Test
@@ -125,8 +125,8 @@ public class MainTest {
 
         MyState myStateFile = MyState.load();
 
-        assertArrayEquals(myState.getMyKeyPair().getMyPublicKey().getEncoded(), myStateFile.getMyKeyPair().getMyPublicKey().getEncoded());
-        assertArrayEquals(myState.getMyKeyPair().getMyPrivateKey().getEncoded(), myStateFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertArrayEquals(myState.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
+        assertArrayEquals(myState.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());
         assertEquals(myState.getMyNonce(), myStateFile.getMyNonce());
     }
 
@@ -135,16 +135,16 @@ public class MainTest {
         MyDirectory myDirectory = new MyDirectory();
         assertEquals(0, myDirectory.sizeOfDirectory());
 
-        myDirectory.addPerson("user1", user1.getMyKeyPair().getMyPublicKey().getEncoded());
+        myDirectory.addPerson("user1", user1.getMyPublicKey().getEncoded());
         assertEquals(1, myDirectory.sizeOfDirectory());
 
-        myDirectory.addPerson("user2", user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        myDirectory.addPerson("user2", user2.getMyPublicKey().getEncoded());
         assertEquals(2, myDirectory.sizeOfDirectory());
 
         myDirectory.saveIntoFile();
         MyDirectory myDirectoryFile = new MyDirectory();
 
-        assertTrue(myDirectory.isInDirectory(user1.getMyKeyPair().getMyPublicKey().getEncoded()));
+        assertTrue(myDirectory.isInDirectory(user1.getMyPublicKey().getEncoded()));
         assertTrue(myDirectoryFile.isInDirectory(myDirectory.getPerson("user2")));
 
         myDirectory.deletePerson("user2");
@@ -164,7 +164,7 @@ public class MainTest {
 
         myState.replaceMyKeyPair();
 
-        assertFalse(Arrays.equals(myStateFile.getMyKeyPair().getMyPublicKey().getEncoded(), myState.getMyKeyPair().getMyPublicKey().getEncoded()));
+        assertFalse(Arrays.equals(myStateFile.getMyPublicKey().getEncoded(), myState.getMyPublicKey().getEncoded()));
         assertNotEquals(digestFile, Tools.digest(MyKeyPair.filename));
     }
 
@@ -178,26 +178,26 @@ public class MainTest {
 
         MyState myStateFile = MyState.load();
 
-        assertArrayEquals(myStateUser1.getMyKeyPair().getMyPublicKey().getEncoded(), myStateFile.getMyKeyPair().getMyPublicKey().getEncoded());
-        assertArrayEquals(myStateUser1.getMyKeyPair().getMyPrivateKey().getEncoded(), myStateFile.getMyKeyPair().getMyPrivateKey().getEncoded());
+        assertArrayEquals(myStateUser1.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
+        assertArrayEquals(myStateUser1.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());
         assertEquals(myStateUser1.getMyNonce(), myStateFile.getMyNonce());
 
         //Create Conversation
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myStateUser1.getMyNonce(), myStateUser1.getMyKeyPair().getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myStateUser1.getMyNonce(), myStateUser1.getMyPublicKey().getEncoded());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
 
-        user2.getMyDirectory().addPerson("user1", myStateUser1.getMyKeyPair().getMyPublicKey().getEncoded());
+        user2.getMyDirectory().addPerson("user1", myStateUser1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
         SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
 
-        myStateUser1.getMyDirectory().addPerson("user2", user2.getMyKeyPair().getMyPublicKey().getEncoded());
+        myStateUser1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
         SecretBuild secretBuildUser1 = Communication.handleMessage1(myStateUser1, message1User1, message1User2For1);
 
         assertTrue(secretBuildUser1.equals(secretBuildUser2));
 
-        String message2User1 = Communication.createMessage2(myStateUser1.getMyKeyPair().getMyPrivateKey(), secretBuildUser1);
-        String message2User2 = Communication.createMessage2(user2.getMyKeyPair().getMyPrivateKey(), secretBuildUser2);
+        String message2User1 = Communication.createMessage2(myStateUser1.getMyPrivateKey(), secretBuildUser1);
+        String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
         assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
         assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
