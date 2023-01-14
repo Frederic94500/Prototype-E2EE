@@ -15,19 +15,6 @@ import static java.util.Arrays.copyOfRange;
 public class Communication {
     /**
      * Create Message1 for the key negotiation/agreement
-     * Message1 -> Base64
-     *
-     * @param publicKey Your Public Key
-     * @param salt      A salt number, a counter of message
-     * @return Return Message1 as Base64
-     */
-    public static String createMessage1(PublicKey publicKey, int salt) {
-        Message1 message1 = new Message1(System.currentTimeMillis() / 1000L, salt, publicKey.getEncoded());
-        return toBase64(message1.toBytes());
-    }
-
-    /**
-     * Create Message1 for the key negotiation/agreement
      *
      * @param message1 Message1 object
      * @return Return Message1 as Base64
