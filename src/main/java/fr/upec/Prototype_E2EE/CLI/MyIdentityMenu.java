@@ -32,6 +32,8 @@ public class MyIdentityMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {

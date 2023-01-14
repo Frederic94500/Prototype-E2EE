@@ -11,5 +11,13 @@ import java.util.Scanner;
  */
 @FunctionalInterface
 public interface InterfaceCLI {
+    /**
+     * Interface function for menu
+     *
+     * @param scanner User input
+     * @param myState User information
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
     void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException;
 }

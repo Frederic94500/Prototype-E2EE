@@ -16,6 +16,7 @@ public class Sign {
      * @param privateKey Your Private Key
      * @param message    Your Message
      * @return Return a signed message
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static byte[] sign(PrivateKey privateKey, String message) throws GeneralSecurityException {
         Signature signature = Signature.getInstance("SHA512withECDSA");
@@ -35,6 +36,7 @@ public class Sign {
      * @param signedMessage The signed message
      * @param message       The message
      * @return Return a boolean if the message come from the other
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static Boolean verify(PublicKey publicKey, byte[] signedMessage, String message) throws GeneralSecurityException {
         Signature signature = Signature.getInstance("SHA512withECDSA");

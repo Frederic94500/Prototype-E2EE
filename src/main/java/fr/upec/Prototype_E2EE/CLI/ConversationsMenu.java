@@ -22,6 +22,7 @@ public class ConversationsMenu implements InterfaceCLI {
      * @param scanner         User input
      * @param myConversations All User conversations
      * @param secretBuild     The chosen conversation
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     private void conversationMenu(Scanner scanner, MyConversations myConversations, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
@@ -55,6 +56,7 @@ public class ConversationsMenu implements InterfaceCLI {
      *
      * @param scanner     User input
      * @param secretBuild A conversation
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     private void cipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
@@ -78,6 +80,7 @@ public class ConversationsMenu implements InterfaceCLI {
      *
      * @param scanner     User input
      * @param secretBuild A conversation
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     private void decipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
@@ -101,6 +104,7 @@ public class ConversationsMenu implements InterfaceCLI {
      *
      * @param scanner User input
      * @param myState User information
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws GeneralSecurityException {

@@ -17,13 +17,16 @@ import java.util.stream.Collectors;
  * <pre>MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!</pre>
  */
 public class MyConversations {
+    /**
+     * Filename
+     */
     public static final String filename = ".MyConversations";
     private final List<SecretBuild> myConversations;
 
     /**
      * Constructor for MyConversations
      *
-     * @throws FileNotFoundException Throw FileNotFoundException if the file was not found
+     * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
     public MyConversations() throws FileNotFoundException {
         this.myConversations = load();
@@ -33,7 +36,7 @@ public class MyConversations {
      * Load .MyConversations and create an ArrayList
      *
      * @return Return an ArrayList of SecretBuild
-     * @throws FileNotFoundException Throw FileNotFoundException if the file was not found
+     * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
     public List<SecretBuild> load() throws FileNotFoundException {
         ArrayList<SecretBuild> myConversations = new ArrayList<>();
@@ -54,7 +57,7 @@ public class MyConversations {
     /**
      * Save MyConversations to .MyConversations
      *
-     * @throws IOException Throw IOException if there is an I/O exception
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     public void save() throws IOException {
         String rawConversations = myConversations.stream()

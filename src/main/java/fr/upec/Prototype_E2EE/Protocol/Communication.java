@@ -28,7 +28,6 @@ public class Communication {
 
     /**
      * Create Message1 for the key negotiation/agreement
-     * Message1 -> Base64
      *
      * @param message1 Message1 object
      * @return Return Message1 as Base64
@@ -39,11 +38,12 @@ public class Communication {
 
     /**
      * Handle the message 1 received from other
-     * otherMessage1 (Base64) -> Message1
      *
      * @param myState       Object MyState
+     * @param myMessage1    My Message1
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static SecretBuild handleMessage1(MyState myState, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
         byte[] otherMessage1Bytes = toBytes(otherMessage1);
@@ -74,11 +74,11 @@ public class Communication {
 
     /**
      * Create message 2 by signing then ciphering
-     * SecretBuild -> Signed (Bytes) -> Ciphered (Bytes) -> Base64
      *
      * @param myPrivateKey  Your Private Key
      * @param mySecretBuild Your SecretBuild
      * @return Return the signed and ciphered message 2 as Base64
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String message2Base64 = toBase64(mySecretBuild.toBytesWithoutSymKey());
@@ -92,11 +92,11 @@ public class Communication {
 
     /**
      * Handle the message 2 received from other
-     * otherMessage2 (Base64) -> Bytes -> Deciphered (Bytes) -> Signed (Bytes)
      *
      * @param mySecretBuild Your SecretBuild
      * @param otherMessage2 Message 2 received by other
      * @return Return a boolean if the message 2 is authentic
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild); //Swap information without symKey

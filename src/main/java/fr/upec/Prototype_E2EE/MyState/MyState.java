@@ -15,9 +15,12 @@ import java.util.Scanner;
 
 /**
  * Contain user state
- * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
+ * <pre>MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!</pre>
  */
 public class MyState {
+    /**
+     * Filename
+     */
     public static final String filename = ".MyState";
     private final MyDirectory myDirectory;
     private final MyConversations myConversations;
@@ -26,6 +29,9 @@ public class MyState {
 
     /**
      * Create MyState
+     *
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
      */
     public MyState() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
@@ -53,6 +59,8 @@ public class MyState {
      * Load or create a MyState
      *
      * @return Return MyState
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static MyState load() throws IOException, GeneralSecurityException {
         if (Tools.isFileExists(filename)) {
@@ -82,6 +90,8 @@ public class MyState {
      *
      * @param rawData Data from .MyState
      * @return Return a Boolean
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     private static boolean isEqualsDigest(String[] rawData) throws IOException, NoSuchAlgorithmException {
         return rawData[0].equals(Tools.digest(MyKeyPair.filename))
@@ -136,6 +146,8 @@ public class MyState {
 
     /**
      * Increment myNonce
+     *
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     public void incrementMyNonce() throws NoSuchAlgorithmException {
         int temp;
@@ -147,7 +159,10 @@ public class MyState {
 
     /**
      * Save MyState in a file
-     * Contain digest .MyKeyPair, Base64 myNonce, all conversations in Base64
+     * <pre>Contain digest .MyKeyPair, digest .MyDirectory, digest .MyConversations, Base64 myNonce</pre>
+     *
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public void save() throws IOException, GeneralSecurityException {
         myKeyPair.save();
@@ -186,6 +201,9 @@ public class MyState {
 
     /**
      * Replace MyKeyPair by a new one and save the new one
+     *
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
      */
     public void replaceMyKeyPair() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();

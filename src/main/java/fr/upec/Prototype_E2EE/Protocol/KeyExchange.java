@@ -17,11 +17,13 @@ import java.security.PublicKey;
 public class KeyExchange {
     /**
      * HMAC Key Derivation Function (HKDF) Extractor
-     * See <a href="https://www.rfc-editor.org/rfc/rfc5869">RFC5869</a>
+     * <pre>See <a href="https://www.rfc-editor.org/rfc/rfc5869">RFC5869</a></pre>
      *
      * @param salt Salt value (a non-secret random value)
      * @param ikm  Input Keying Material
      * @return Return a PseudoRandom Key
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
     public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA512");
@@ -33,13 +35,15 @@ public class KeyExchange {
 
     /**
      * HMAC Key Derivation Function (HKDF) Expand
-     * Based on the library HKDF by Patrick Favre-Bulle in <a href="https://github.com/patrickfav/hkdf">GitHub</a>
-     * See <a href="https://www.rfc-editor.org/rfc/rfc5869">RFC5869</a>
+     * <pre>Based on the library HKDF by Patrick Favre-Bulle in <a href="https://github.com/patrickfav/hkdf">GitHub</a>
+     * See <a href="https://www.rfc-editor.org/rfc/rfc5869">RFC5869</a></pre>
      *
      * @param prk  PseudoRandom Key
      * @param info An information
      * @param olb  Out Length Bytes
      * @return Return a HKDF
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
     public static byte[] hkdfExpand(byte[] prk, String info, int olb) throws NoSuchAlgorithmException, InvalidKeyException {
         if (olb <= 0 || prk == null) {
@@ -83,7 +87,12 @@ public class KeyExchange {
      *
      * @param privateKey     Your Private Key
      * @param publicKeyOther Public Key of the other person
+     * @param myNonce        My nonce
+     * @param otherNonce     Other nonce
+     * @param info           Info
      * @return Return the shared key
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
     public static SecretKey createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");

@@ -18,7 +18,7 @@ import java.util.Scanner;
 import static java.util.Arrays.copyOfRange;
 
 /**
- * Some tools...
+ * Frequently used functions
  */
 public class Tools {
     /**
@@ -55,6 +55,7 @@ public class Tools {
      *
      * @param bytesPubKey Bytes Public Key
      * @return Return PublicKey
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static PublicKey toPublicKey(byte[] bytesPubKey) throws GeneralSecurityException {
         return KeyFactory.getInstance("EC").generatePublic(new X509EncodedKeySpec(bytesPubKey));
@@ -65,6 +66,7 @@ public class Tools {
      *
      * @param privateKeyBytes Bytes Private Key
      * @return Return PrivateKey
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static PrivateKey toPrivateKey(byte[] privateKeyBytes) throws GeneralSecurityException {
         return KeyFactory.getInstance("EC").generatePrivate(new PKCS8EncodedKeySpec(privateKeyBytes));
@@ -84,6 +86,7 @@ public class Tools {
      * Generate a SecureRandom using AES(256)
      *
      * @return Return a SecureRandom
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     public static SecureRandom generateSecureRandom() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -142,6 +145,8 @@ public class Tools {
 
     /**
      * Delete a file
+     *
+     * @param filename File to be deleted
      */
     public static void deleteFile(String filename) {
         new File(filename).delete();
@@ -150,7 +155,10 @@ public class Tools {
     /**
      * Compute the checksum of a file
      *
+     * @param filename File to get the digest
      * @return Return an SHA-512 Checksum
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     public static String digest(String filename) throws IOException, NoSuchAlgorithmException {
         byte[] digest = MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(Path.of(filename)));

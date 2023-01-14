@@ -13,7 +13,13 @@ import java.security.SecureRandom;
  * Cipher and Decipher text
  */
 public class MessageCipher {
+    /**
+     * Galois Counter Mode IV
+     */
     public static final int GCM_IV_LENGTH = 12;
+    /**
+     * Galois Counter Mode Tag
+     */
     public static final int GCM_TAG_LENGTH = 16;
 
     /**
@@ -22,6 +28,7 @@ public class MessageCipher {
      * @param key  Symmetric Key
      * @param text Text in Bytes
      * @return Return a ciphered text in Bytes
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static byte[] cipher(SecretKey key, byte[] text) throws GeneralSecurityException {
         // Get Cipher Instance
@@ -49,6 +56,7 @@ public class MessageCipher {
      * @param key           Symmetric Key
      * @param cipherMessage Ciphered Text in Bytes
      * @return Return a Text in Bytes
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static byte[] decipher(SecretKey key, byte[] cipherMessage) throws GeneralSecurityException {
         // Get Cipher Instance

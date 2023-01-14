@@ -33,6 +33,8 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     private void addPerson(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         String name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
@@ -60,6 +62,8 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
      */
     private void deletePerson(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
         if (myState.getMyDirectory().sizeOfDirectory() == 0) {
@@ -86,6 +90,8 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User Information
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
