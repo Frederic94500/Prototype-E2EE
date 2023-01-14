@@ -1,5 +1,6 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.MyState.MyConversations;
 import fr.upec.Prototype_E2EE.MyState.MyDirectory;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import fr.upec.Prototype_E2EE.MyState.MyState;
@@ -33,6 +34,7 @@ public class MainTest {
         Tools.deleteFile(MyState.filename);
         Tools.deleteFile(MyKeyPair.filename);
         Tools.deleteFile(MyDirectory.filename);
+        Tools.deleteFile(MyConversations.filename);
     }
 
     @After
@@ -40,6 +42,7 @@ public class MainTest {
         Tools.deleteFile(MyState.filename);
         Tools.deleteFile(MyKeyPair.filename);
         Tools.deleteFile(MyDirectory.filename);
+        Tools.deleteFile(MyConversations.filename);
     }
 
     @Test
@@ -203,25 +206,27 @@ public class MainTest {
         assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
         //End create Conversation
 
-        //Add Conversation to MyInformation
+        //Add Conversation to MyState
         myStateUser1.addAConversation(secretBuildUser1);
         myStateUser1.incrementMyNonce();
         myStateUser1.save();
 
-        assertEquals(1, myStateUser1.getMyConversations().size());
+        assertEquals(1, myStateUser1.getMyConversations().getSize());
+
+        MyConversations myConversationsUser1 = myStateUser1.getMyConversations();
 
         //Test cipher/decipher message
         String textString = "Another bites the dust";
-        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myStateUser1.getMyConversations().get(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myConversationsUser1.getConversation(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
         assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
 
         //Delete a Conversation
-        myStateUser1.deleteAConversation(myStateUser1.getMyConversations().get(0).getMyNonce());
+        myConversationsUser1.deleteConversation(myConversationsUser1.getConversation(0));
         myStateUser1.save();
 
-        assertEquals(0, myStateUser1.getMyConversations().size());
+        assertEquals(0, myConversationsUser1.getSize());
     }
 }

@@ -11,8 +11,6 @@ import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -22,7 +20,7 @@ import java.util.Scanner;
 public class MyState {
     public static final String filename = ".MyState";
     private final MyDirectory myDirectory;
-    private final List<MyConversation> myConversations;
+    private final MyConversations myConversations;
     private MyKeyPair myKeyPair;
     private int myNonce;
 
@@ -32,22 +30,23 @@ public class MyState {
     public MyState() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
         this.myDirectory = new MyDirectory();
+        this.myConversations = new MyConversations();
         this.myNonce = 0;
-        this.myConversations = new ArrayList<>();
     }
 
     /**
      * Create MyState from known information
      *
      * @param myKeyPair       MyKeyPair
-     * @param myNonce         MyNonce
+     * @param myDirectory     MyDirectory
      * @param myConversations MyConversations
+     * @param myNonce         MyNonce
      */
-    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, int myNonce, ArrayList<MyConversation> myConversations) {
+    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, MyConversations myConversations, int myNonce) {
         this.myKeyPair = myKeyPair;
         this.myDirectory = myDirectory;
-        this.myNonce = myNonce;
         this.myConversations = myConversations;
+        this.myNonce = myNonce;
     }
 
     /**
@@ -60,11 +59,16 @@ public class MyState {
             Scanner scanner = new Scanner(new File(filename));
             String data = scanner.nextLine();
             scanner.close();
-            String[] dataBase64 = data.split(",");
-            if (isEqualsDigest(dataBase64)) {
-                return new MyState(MyKeyPair.load(), new MyDirectory(), ByteBuffer.wrap(Tools.toBytes(dataBase64[2])).getInt(), getMyConversationsFromBase64(dataBase64));
+            String[] rawData = data.split(",");
+            if (isEqualsDigest(rawData)) {
+                return new MyState(MyKeyPair.load(),
+                        new MyDirectory(),
+                        new MyConversations(),
+                        ByteBuffer.wrap(Tools.toBytes(rawData[3])).getInt());
             } else {
-                throw new IllegalStateException("Not corresponding Key Pair");
+                throw new IllegalStateException("""
+                        WARNING!!! YOUR FILES HAS BEEN COMPROMISED!
+                        PLEASE ERASE .MyState, .MyKeyPair, .MyDirectory AND .MyConversations!!!""");
             }
         } else {
             MyState myState = new MyState();
@@ -74,28 +78,15 @@ public class MyState {
     }
 
     /**
-     * Convert all Conversations Base64 to MyConversation object
+     * Verify if the digest of .MyKeyPair, .MyDirectory and .MyConversations is the same
      *
-     * @param dataBase64 MyState in Base64
-     * @return Return all Conversations
-     */
-    private static ArrayList<MyConversation> getMyConversationsFromBase64(String[] dataBase64) {
-        ArrayList<MyConversation> myConversations = new ArrayList<>();
-        for (int i = 3; i < dataBase64.length; i++) {
-            byte[] aConversation = Tools.toBytes(dataBase64[i]);
-            myConversations.add(new MyConversation(new SecretBuild(aConversation)));
-        }
-        return myConversations;
-    }
-
-    /**
-     * Verify if the digest of .MyKeyPair and .MyDirectory is the same
-     *
-     * @param dataBase64 Data in Base64
+     * @param rawData Data from .MyState
      * @return Return a Boolean
      */
-    private static boolean isEqualsDigest(String[] dataBase64) throws IOException, NoSuchAlgorithmException {
-        return dataBase64[0].equals(Tools.digest(MyKeyPair.filename)) && dataBase64[1].equals(Tools.digest(MyDirectory.filename));
+    private static boolean isEqualsDigest(String[] rawData) throws IOException, NoSuchAlgorithmException {
+        return rawData[0].equals(Tools.digest(MyKeyPair.filename))
+                && rawData[1].equals(Tools.digest(MyDirectory.filename))
+                && rawData[2].equals(Tools.digest(MyConversations.filename));
     }
 
     /**
@@ -117,20 +108,11 @@ public class MyState {
     }
 
     /**
-     * Get my nonce
-     *
-     * @return int MyNonce
-     */
-    public int getMyNonce() {
-        return myNonce;
-    }
-
-    /**
      * Get all conversations
      *
      * @return Return ArrayList MyConversations
      */
-    public List<MyConversation> getMyConversations() {
+    public MyConversations getMyConversations() {
         return myConversations;
     }
 
@@ -141,6 +123,15 @@ public class MyState {
      */
     public MyDirectory getMyDirectory() {
         return myDirectory;
+    }
+
+    /**
+     * Get my nonce
+     *
+     * @return int MyNonce
+     */
+    public int getMyNonce() {
+        return myNonce;
     }
 
     /**
@@ -161,20 +152,17 @@ public class MyState {
     public void save() throws IOException, GeneralSecurityException {
         myKeyPair.save();
         myDirectory.saveIntoFile();
+        myConversations.save();
         String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
         String checksumMyDirectory = Tools.digest(MyDirectory.filename);
+        String checksumMyConversations = Tools.digest(MyConversations.filename);
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
-        ArrayList<String> arrayList = new ArrayList<>();
-        for (MyConversation myConversation : myConversations) {
-            arrayList.add(Tools.toBase64(myConversation.toBytes()));
-        }
-        String allConversations = String.join(",", arrayList);
 
         if (!Tools.isFileExists(filename)) {
             Tools.createFile(filename);
         }
         FileWriter writer = new FileWriter(filename);
-        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + myNonceBase64 + "," + allConversations);
+        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + checksumMyConversations + "," + myNonceBase64);
         writer.close();
     }
 
@@ -184,32 +172,16 @@ public class MyState {
      * @param secretBuild SecretBuild from the new conversation
      */
     public void addAConversation(SecretBuild secretBuild) {
-        myConversations.add(new MyConversation(secretBuild));
+        myConversations.addConversation(secretBuild);
     }
 
     /**
-     * Delete a conversation
+     * Get the size of conversations
      *
-     * @param nonce myNonce
+     * @return Return the size of conversations
      */
-    public void deleteAConversation(int nonce) throws GeneralSecurityException, IOException {
-        for (int i = 0; i < myConversations.size(); i++) {
-            if (myConversations.get(i).getMyNonce() == nonce) {
-                myConversations.remove(i);
-                save();
-                break;
-            }
-        }
-    }
-
-    /**
-     * Delete a conversation
-     *
-     * @param conversation Conversation to delete
-     */
-    public void deleteAConversation(MyConversation conversation) throws GeneralSecurityException, IOException {
-        myConversations.remove(conversation);
-        save();
+    public int getConversationSize() {
+        return myConversations.getSize();
     }
 
     /**
@@ -219,24 +191,5 @@ public class MyState {
         this.myKeyPair = new MyKeyPair();
         this.myKeyPair.save();
         this.save();
-    }
-
-    /**
-     * Get the size of conversation
-     *
-     * @return Return the size of conversation
-     */
-    public int getConversationSize() {
-        return myConversations.size();
-    }
-
-    /**
-     * Get a conversation
-     *
-     * @param index Index to get
-     * @return Return a conversation
-     */
-    public MyConversation getConversation(int index) {
-        return myConversations.get(index);
     }
 }

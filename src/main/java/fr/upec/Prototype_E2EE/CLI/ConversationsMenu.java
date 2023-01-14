@@ -1,12 +1,12 @@
 package fr.upec.Prototype_E2EE.CLI;
 
-import fr.upec.Prototype_E2EE.MyState.MyConversation;
+import fr.upec.Prototype_E2EE.MyState.MyConversations;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.MessageCipher;
+import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.SecretKey;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
@@ -19,11 +19,11 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Menu for a single conversation
      *
-     * @param scanner        User input
-     * @param myState        User information
-     * @param myConversation A conversation
+     * @param scanner         User input
+     * @param myConversations All User conversations
+     * @param secretBuild     The chosen conversation
      */
-    private void conversationMenu(Scanner scanner, MyState myState, MyConversation myConversation) throws GeneralSecurityException, IOException {
+    private void conversationMenu(Scanner scanner, MyConversations myConversations, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
         int input;
 
@@ -40,11 +40,11 @@ public class ConversationsMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
-                cipherMenu(scanner, myConversation);
+                cipherMenu(scanner, secretBuild);
             } else if (input == 2) {
-                decipherMenu(scanner, myConversation);
+                decipherMenu(scanner, secretBuild);
             } else if (input == 3) {
-                myState.deleteAConversation(myConversation);
+                myConversations.deleteConversation(secretBuild);
                 cli = false;
             }
         } while (cli);
@@ -53,13 +53,13 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Cipher a message
      *
-     * @param scanner        User input
-     * @param myConversation A conversation
+     * @param scanner     User input
+     * @param secretBuild A conversation
      */
-    private void cipherMenu(Scanner scanner, MyConversation myConversation) throws GeneralSecurityException {
+    private void cipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
         String input;
-        SecretKey secretKey = Tools.toSecretKey(myConversation.getSymKey());
+        SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
 
         do {
             input = Tools.getInput(scanner, "Please type your message to cipher (0 = return back):\n");
@@ -76,13 +76,13 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Decipher a message
      *
-     * @param scanner        User input
-     * @param myConversation A conversation
+     * @param scanner     User input
+     * @param secretBuild A conversation
      */
-    private void decipherMenu(Scanner scanner, MyConversation myConversation) throws GeneralSecurityException {
+    private void decipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
         String input;
-        SecretKey secretKey = Tools.toSecretKey(myConversation.getSymKey());
+        SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
 
         do {
             input = Tools.getInput(scanner, "Please paste the message to decipher (0 = return back):\n");
@@ -103,9 +103,10 @@ public class ConversationsMenu implements InterfaceCLI {
      * @param myState User information
      */
     @Override
-    public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
+    public void menu(Scanner scanner, MyState myState) throws GeneralSecurityException {
         boolean cli = true;
         int input;
+        MyConversations myConversations = myState.getMyConversations();
 
         do {
             StringBuilder sb = new StringBuilder();
@@ -115,8 +116,8 @@ public class ConversationsMenu implements InterfaceCLI {
                 sb.append("== You do not have any conversations! ==\n");
             } else {
                 sb.append("===== Please choose a conversation =====\n");
-                for (int i = 0; i < myState.getConversationSize(); i++) {
-                    MyConversation conversation = myState.getConversation(i);
+                for (int i = 0; i < myConversations.getSize(); i++) {
+                    SecretBuild conversation = myConversations.getConversation(i);
                     Date date = new Date(conversation.getMyDate() * 1000L);
                     sb.append("| ")
                             .append(i + 1)
@@ -134,7 +135,7 @@ public class ConversationsMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else {
-                conversationMenu(scanner, myState, myState.getConversation(input - 1));
+                conversationMenu(scanner, myConversations, myConversations.getConversation(input - 1));
             }
         } while (cli);
     }
