@@ -6,6 +6,7 @@ import fr.upec.Prototype_E2EE.Protocol.MessageCipher;
 import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -88,13 +89,17 @@ public class ConversationsMenu implements InterfaceCLI {
         SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
 
         do {
-            input = Tools.getInput(scanner, "Please paste the message to decipher (0 = return back):\n");
-            if (input.equals("0")) {
-                cli = false;
-            } else {
-                byte[] decipheredMessageByte = MessageCipher.decipher(secretKey, Tools.toBytes(input));
-                System.out.println("Here is your deciphered message:");
-                System.out.println(new String(decipheredMessageByte) + "\n");
+            try {
+                input = Tools.getInput(scanner, "Please paste the message to decipher (0 = return back):\n");
+                if (input.equals("0")) {
+                    cli = false;
+                } else {
+                    byte[] decipheredMessageByte = MessageCipher.decipher(secretKey, Tools.toBytes(input));
+                    System.out.println("Here is your deciphered message:");
+                    System.out.println(new String(decipheredMessageByte) + "\n");
+                }
+            } catch (IllegalArgumentException | AEADBadTagException e) {
+                System.out.println("Cannot decipher this message!");
             }
         } while (cli);
     }
