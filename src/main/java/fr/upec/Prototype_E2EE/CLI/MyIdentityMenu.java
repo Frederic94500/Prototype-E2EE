@@ -38,7 +38,11 @@ public class MyIdentityMenu implements InterfaceCLI {
         String input = Tools.getInput(scanner, "Are your sure to replace your identity? (y = yes, other key = no) ");
         if (input.equalsIgnoreCase("y")) {
             myState.replaceMyKeyPair();
+            System.out.println("Your identity has been replaced!");
+        } else {
+            System.out.println("Your identity has not been replaced");
         }
+        System.out.println();
     }
 
     /**
