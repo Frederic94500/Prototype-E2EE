@@ -81,12 +81,20 @@ public class StartConversationMenu implements InterfaceCLI {
         System.out.println(myMessage2 + "\n");
 
         String input;
+        boolean pass = false;
         do {
             input = Tools.getInput(scanner, "Please paste the Message 2 from your sender (0 = return back): \n");
             if (input.equals("0")) {
                 return false;
+            } else {
+                try {
+                    pass = Communication.handleMessage2(mySecretBuild, input);
+                    pass = true;
+                } catch (Exception e) {
+                    System.out.println("This is not the expected Message 2!");
+                }
             }
-        } while (!Communication.handleMessage2(mySecretBuild, input));
+        } while (!pass);
 
         return true;
     }
