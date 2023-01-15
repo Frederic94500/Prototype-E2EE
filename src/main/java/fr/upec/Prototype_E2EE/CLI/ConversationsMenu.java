@@ -47,6 +47,7 @@ public class ConversationsMenu implements InterfaceCLI {
                 decipherMenu(scanner, secretBuild);
             } else if (input == 3) {
                 myConversations.deleteConversation(secretBuild);
+                System.out.println("This conversation has been deleted!\n");
                 cli = false;
             }
         } while (cli);
