@@ -28,6 +28,21 @@ public class MyIdentityMenu implements InterfaceCLI {
     }
 
     /**
+     * Replace Identity Menu
+     *
+     * @param scanner User input
+     * @param myState User information
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
+     */
+    private void replaceMyIdentityMenu(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
+        String input = Tools.getInput(scanner, "Are your sure to replace your identity? (y = yes, other key = no) ");
+        if (input.equalsIgnoreCase("y")) {
+            myState.replaceMyKeyPair();
+        }
+    }
+
+    /**
      * Menu for Identity
      *
      * @param scanner Scanner user input
@@ -54,8 +69,7 @@ public class MyIdentityMenu implements InterfaceCLI {
             } else if (input == 1) {
                 showMyPubKey(myState);
             } else if (input == 2) {
-                myState.replaceMyKeyPair();
-                myState.save();
+                replaceMyIdentityMenu(scanner, myState);
             }
         } while (cli);
     }
