@@ -129,10 +129,16 @@ public class ConversationsMenu implements InterfaceCLI {
                 for (int i = 0; i < myConversations.getSize(); i++) {
                     SecretBuild conversation = myConversations.getConversation(i);
                     Date date = new Date(conversation.getMyDate() * 1000L);
+                    String name;
+                    if (myState.getMyDirectory().isInDirectory(conversation.getOtherPubKey())) {
+                        name = myState.getMyDirectory().getKeyName(conversation.getOtherPubKey());
+                    } else {
+                        name = "Deleted person";
+                    }
                     sb.append("| ")
                             .append(i + 1)
                             .append(" - ")
-                            .append(myState.getMyDirectory().getKeyName(conversation.getOtherPubKey()))
+                            .append(name)
                             .append(" - ")
                             .append(date)
                             .append("\n");
