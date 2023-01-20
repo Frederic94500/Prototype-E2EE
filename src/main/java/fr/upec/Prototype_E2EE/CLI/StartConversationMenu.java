@@ -11,25 +11,6 @@ import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
 /**
- * ToMessage2 is a temporary class to return 2 objects at a time
- */
-class ToMessage2 {
-    boolean toMessage2;
-    SecretBuild secretBuild;
-
-    /**
-     * Constructor of ToMessage2
-     *
-     * @param toMessage2  To pass to the Message2
-     * @param secretBuild SecretBuild for the conversation
-     */
-    public ToMessage2(boolean toMessage2, SecretBuild secretBuild) {
-        this.toMessage2 = toMessage2;
-        this.secretBuild = secretBuild;
-    }
-}
-
-/**
  * Start a new Conversation Menu for CLI
  */
 public class StartConversationMenu implements InterfaceCLI {
@@ -42,7 +23,7 @@ public class StartConversationMenu implements InterfaceCLI {
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      * @throws IOException              Throws IOException if there is an I/O exception
      */
-    private ToMessage2 message1(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
+    private SecretBuild message1(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
         Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce(), myState.getMyPublicKey().getEncoded());
         myState.incrementMyNonce();
         myState.save();
@@ -54,7 +35,7 @@ public class StartConversationMenu implements InterfaceCLI {
         do {
             inputOtherMessage1 = Tools.getInput(scanner, "Please paste the Message 1 from your sender (0 = return back): \n");
             if (inputOtherMessage1.equals("0")) {
-                return new ToMessage2(false, null);
+                return null;
             }
             try {
                 secretBuild = Communication.handleMessage1(myState, myMessage1, inputOtherMessage1);
@@ -63,7 +44,7 @@ public class StartConversationMenu implements InterfaceCLI {
             }
         } while (secretBuild == null);
 
-        return new ToMessage2(true, secretBuild);
+        return secretBuild;
     }
 
     /**
@@ -109,15 +90,15 @@ public class StartConversationMenu implements InterfaceCLI {
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
-        ToMessage2 toMessage2 = message1(scanner, myState);
-        if (toMessage2.toMessage2) {
+        SecretBuild message2 = message1(scanner, myState);
+        if (message2 != null) {
             System.out.println();
-            if (message2(scanner, myState, toMessage2.secretBuild)) {
+            if (message2(scanner, myState, message2)) {
                 System.out.println();
-                myState.addAConversation(toMessage2.secretBuild);
+                myState.addAConversation(message2);
                 myState.save();
 
-                System.out.println("Conversation with " + myState.getMyDirectory().getKeyName(toMessage2.secretBuild.getOtherPubKey()) + " has been created!\n");
+                System.out.println("Conversation with " + myState.getMyDirectory().getKeyName(message2.getOtherPubKey()) + " has been created!\n");
             }
         }
     }
