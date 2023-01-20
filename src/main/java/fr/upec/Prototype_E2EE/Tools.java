@@ -225,9 +225,12 @@ public class Tools {
     }
 
     public static String keyParser(String keyPem) {
-        String[] tokens = keyPem.split("-----");
-        System.out.println(tokens[1]);
-        return tokens[1];
+        if (keyPem.contains("----BEGIN EC PUBLIC KEY-----")) {
+            String[] tokens = keyPem.split("-----");
+            return tokens[1];
+        }
+        return keyPem;
+
 
     }
 }
