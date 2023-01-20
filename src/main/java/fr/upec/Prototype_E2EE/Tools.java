@@ -206,6 +206,23 @@ public class Tools {
     }
 
     /**
+     * Get user input, special for parser
+     *
+     * @param sentence Sentence for the input
+     * @return Return user input
+     */
+    public static String getInputParser(String sentence) {
+        System.out.print(sentence);
+        Scanner scanner = new Scanner(System.in);
+
+        String input = scanner.nextLine();
+        if (input.equals("0")) {
+            return "0";
+        }
+        return input;
+    }
+
+    /**
      * Verify if the Public Key is an EC key
      *
      * @param pubKey EC Public Key
@@ -224,13 +241,26 @@ public class Tools {
         return true;
     }
 
+    /**
+     * Parser for the Public Key from PEM format
+     *
+     * @param keyPem Public Key
+     * @return Return parsed Public Key
+     */
     public static String keyParser(String keyPem) {
         if (keyPem.contains("----BEGIN EC PUBLIC KEY-----")) {
             String[] tokens = keyPem.split("-----");
-            return tokens[1];
+            for (String token : tokens) {
+                try {
+                    if (Tools.toBytes(token).length == 91) {
+                        return token;
+                    }
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } else if (Tools.toBytes(keyPem).length == 91) {
+            return keyPem;
         }
-        return keyPem;
-
-
+        throw new IllegalArgumentException("Can't find public key!");
     }
 }

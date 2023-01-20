@@ -169,6 +169,18 @@ public class MainTest {
     }
 
     @Test
+    public void testParserPubKey() {
+        String pemKey = "-----BEGIN EC PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==-----END EC PUBLIC KEY-----";
+        String pubKey = Tools.keyParser(pemKey);
+        String reTestPubKey = Tools.keyParser(pubKey);
+        String wrongPubKey = "I'm sorry, Dave. I'm afraid I can't do that.";
+
+        assertEquals("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==", pubKey);
+        assertEquals("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==", reTestPubKey);
+        assertThrows(IllegalArgumentException.class, () -> Tools.keyParser(wrongPubKey));
+    }
+
+    @Test
     public void testAll() throws GeneralSecurityException, IOException {
         //Create MyState
         MyState myStateUser1 = MyState.load();

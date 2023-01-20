@@ -11,13 +11,6 @@ import java.util.Scanner;
  * My Directory Menu for CLI
  */
 public class MyDirectoryMenu implements InterfaceCLI {
-    public static String keyParser(String keyPem) {
-        String[] tokens = keyPem.split("-----");
-        System.out.println(tokens[1]);
-        return tokens[1];
-
-    }
-
     /**
      * Show Directory
      *
@@ -44,14 +37,20 @@ public class MyDirectoryMenu implements InterfaceCLI {
     private void addPerson(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
         String name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
         if (!name.equals("0")) {
-            String pubKey;
+            String input;
+            String pubKey = "";
             do {
-                pubKey = Tools.getInput(scanner, "Public Key of the person (0 = return back): ");
-                if (pubKey.equals("0")) {
+                input = Tools.getInputParser("Public Key of the person (0 = return back): ");
+                if (input.equals("0")) {
                     break;
+                } else {
+                    try {
+                        pubKey = Tools.keyParser(input);
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
             } while (!Tools.isECPubKey(Tools.toBytes(pubKey)));
-            if (!pubKey.equals("0")) {
+            if (!input.equals("0") && !pubKey.equals("")) {
                 byte[] pubKeyByte = Tools.toBytes(pubKey);
                 myState.getMyDirectory().addPerson(name, pubKeyByte);
                 myState.save();
