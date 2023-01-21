@@ -6,8 +6,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * Object for SecretBuild 238 bytes
- * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
+ * Object for SecretBuild
+ * <pre>MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  * long myDate = 8 bytes
  * long otherDate = 8 bytes
  * int myNonce = 4 bytes
@@ -15,6 +15,7 @@ import java.util.Arrays;
  * byte[] myPubKey = 91 bytes
  * byte[] otherPubKey = 91 bytes
  * byte[] symKey = 32 bytes
+ * SecretBuild total size = 238 bytes</pre>
  */
 public class SecretBuild {
     private final long myDate;
@@ -124,26 +125,56 @@ public class SecretBuild {
         return buffer.array();
     }
 
+    /**
+     * Get my UNIX timestamp
+     *
+     * @return Return my UNIX timestamp
+     */
     public long getMyDate() {
         return myDate;
     }
 
+    /**
+     * Get other UNIX timestamp
+     *
+     * @return Return other UNIX timestamp
+     */
     public long getOtherDate() {
         return otherDate;
     }
 
+    /**
+     * Get my nonce
+     *
+     * @return Return my nonce
+     */
     public int getMyNonce() {
         return myNonce;
     }
 
+    /**
+     * Get other nonce
+     *
+     * @return Return other nonce
+     */
     public int getOtherNonce() {
         return otherNonce;
     }
 
+    /**
+     * Get other Public Key
+     *
+     * @return Return other Public Key
+     */
     public byte[] getOtherPubKey() {
         return otherPubKey;
     }
 
+    /**
+     * Get Symmetric Key
+     *
+     * @return Return Symmetric Key
+     */
     public byte[] getSymKey() {
         return symKey;
     }

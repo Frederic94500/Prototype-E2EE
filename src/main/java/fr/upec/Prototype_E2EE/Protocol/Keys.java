@@ -16,6 +16,8 @@ public class Keys {
      * Generate a KeyPair with a SecureRandom
      *
      * @return Return KeyPair
+     * @throws NoSuchAlgorithmException           Throws NoSuchAlgorithmException if there is not the expected algorithm
+     * @throws InvalidAlgorithmParameterException InvalidAlgorithmParameterException if there is an invalid or inappropriate algorithm parameter
      */
     public static KeyPair generate() throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");

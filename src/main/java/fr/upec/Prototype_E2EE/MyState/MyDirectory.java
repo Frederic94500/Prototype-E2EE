@@ -7,12 +7,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * MyDirectory contains a list of persons
+ */
 public class MyDirectory {
+    /**
+     * Filename
+     */
     public final static String filename = ".MyDirectory";
     private final HashMap<String, byte[]> directory;
 
     /**
      * Constructor MyDirectory
+     *
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     public MyDirectory() throws IOException {
         this.directory = readFile();
@@ -22,6 +30,7 @@ public class MyDirectory {
      * Read .MyDirectory
      *
      * @return Return HashMap
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     public HashMap<String, byte[]> readFile() throws IOException {
         HashMap<String, byte[]> map = new HashMap<>();
@@ -44,6 +53,8 @@ public class MyDirectory {
 
     /**
      * Save MyDirectory to a file
+     *
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     public void saveIntoFile() throws IOException {
         if (!Tools.isFileExists(filename)) {
@@ -54,6 +65,8 @@ public class MyDirectory {
 
     /**
      * Write MyDirectory to a file
+     *
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     private void writeToFile() throws IOException {
         FileWriter fw = new FileWriter(filename);
