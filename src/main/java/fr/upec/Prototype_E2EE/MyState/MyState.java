@@ -99,6 +99,7 @@ public class MyState {
                 && rawData[2].equals(Tools.digest(MyConversations.filename));
     }
 
+
     /**
      * Get my Public Key from MyKeyPair
      *
