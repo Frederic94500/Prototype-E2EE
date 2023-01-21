@@ -15,16 +15,34 @@ public class MyIdentityMenu implements InterfaceCLI {
     /**
      * Show my Public Key
      *
-     * @param myState User information
+     * @param publicKey My Public Key
      */
-    private void showMyPubKey(MyState myState) {
+    private void showMyPubKey(PublicKey publicKey) {
         System.out.println("Here is your public key:\n");
         System.out.println("-----BEGIN EC PUBLIC KEY-----");
-        PublicKey pubKey = myState.getMyKeyPair().getMyPublicKey();
-        byte[] pubKeyByte = pubKey.getEncoded();
-        String str_key = Tools.toBase64(pubKeyByte);
-        System.out.println(str_key);
+        byte[] pubKeyByte = publicKey.getEncoded();
+        String publicKeyBase64 = Tools.toBase64(pubKeyByte);
+        System.out.println(publicKeyBase64);
         System.out.println("-----END EC PUBLIC KEY-----\n");
+    }
+
+    /**
+     * Replace Identity Menu
+     *
+     * @param scanner User input
+     * @param myState User information
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
+     */
+    private void replaceMyIdentityMenu(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
+        String input = Tools.getInput(scanner, "Are your sure to replace your identity? (y = yes, other key = no) ");
+        if (input.equalsIgnoreCase("y")) {
+            myState.replaceMyKeyPair();
+            System.out.println("Your identity has been replaced!");
+        } else {
+            System.out.println("Your identity has not been replaced");
+        }
+        System.out.println();
     }
 
     /**
@@ -32,6 +50,8 @@ public class MyIdentityMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
+     * @throws IOException              Throws IOException if there is an I/O exception
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
@@ -50,10 +70,9 @@ public class MyIdentityMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
-                showMyPubKey(myState);
+                showMyPubKey(myState.getMyPublicKey());
             } else if (input == 2) {
-                myState.replaceMyKeyPair();
-                myState.save();
+                replaceMyIdentityMenu(scanner, myState);
             }
         } while (cli);
     }

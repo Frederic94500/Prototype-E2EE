@@ -4,9 +4,10 @@ import java.nio.ByteBuffer;
 
 /**
  * Object for Message 1
- * long = 8 bytes
+ * <pre>long = 8 bytes
  * int = 4 bytes
  * pubKey = 91 bytes
+ * Message 1 total size = 103 bytes</pre>
  */
 public class Message1 {
     private final long timestamp;

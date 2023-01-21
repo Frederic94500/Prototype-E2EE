@@ -15,20 +15,6 @@ import static java.util.Arrays.copyOfRange;
 public class Communication {
     /**
      * Create Message1 for the key negotiation/agreement
-     * Message1 -> Base64
-     *
-     * @param publicKey Your Public Key
-     * @param salt      A salt number, a counter of message
-     * @return Return Message1 as Base64
-     */
-    public static String createMessage1(PublicKey publicKey, int salt) {
-        Message1 message1 = new Message1(System.currentTimeMillis() / 1000L, salt, publicKey.getEncoded());
-        return toBase64(message1.toBytes());
-    }
-
-    /**
-     * Create Message1 for the key negotiation/agreement
-     * Message1 -> Base64
      *
      * @param message1 Message1 object
      * @return Return Message1 as Base64
@@ -39,11 +25,12 @@ public class Communication {
 
     /**
      * Handle the message 1 received from other
-     * otherMessage1 (Base64) -> Message1
      *
      * @param myState       Object MyState
+     * @param myMessage1    My Message1
      * @param otherMessage1 Message 1 received from other
      * @return Return a SecureBuild
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static SecretBuild handleMessage1(MyState myState, Message1 myMessage1, String otherMessage1) throws GeneralSecurityException {
         byte[] otherMessage1Bytes = toBytes(otherMessage1);
@@ -61,24 +48,24 @@ public class Communication {
         }
 
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(myState.getMyKeyPair().getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
+        byte[] symKey = KeyExchange.createSharedKey(myState.getMyPrivateKey(), otherPubKey, myMessage1.getNonce(), otherNonce, "Shinzou o Sasageyo!").getEncoded();
 
         return new SecretBuild(myMessage1.getTimestamp(),
                 otherTimestamp,
                 myMessage1.getNonce(),
                 otherNonce,
-                myState.getMyKeyPair().getMyPublicKey().getEncoded(),
+                myState.getMyPublicKey().getEncoded(),
                 otherPubKeyByte,
                 symKey);
     }
 
     /**
      * Create message 2 by signing then ciphering
-     * SecretBuild -> Signed (Bytes) -> Ciphered (Bytes) -> Base64
      *
      * @param myPrivateKey  Your Private Key
      * @param mySecretBuild Your SecretBuild
      * @return Return the signed and ciphered message 2 as Base64
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String message2Base64 = toBase64(mySecretBuild.toBytesWithoutSymKey());
@@ -92,11 +79,11 @@ public class Communication {
 
     /**
      * Handle the message 2 received from other
-     * otherMessage2 (Base64) -> Bytes -> Deciphered (Bytes) -> Signed (Bytes)
      *
      * @param mySecretBuild Your SecretBuild
      * @param otherMessage2 Message 2 received by other
      * @return Return a boolean if the message 2 is authentic
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static Boolean handleMessage2(SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild); //Swap information without symKey

@@ -11,15 +11,21 @@ import java.util.Scanner;
 
 /**
  * Store the PublicKey and the PrivateKey of the user
- * MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
+ * <pre>MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!</pre>
  */
 public class MyKeyPair {
+    /**
+     * Filename
+     */
     public static final String filename = ".MyKeyPair";
     private final PublicKey myPublicKey;
     private final PrivateKey myPrivateKey;
 
     /**
      * Constructor of MyKeyPair if file does not exist
+     *
+     * @throws InvalidAlgorithmParameterException InvalidAlgorithmParameterException if there is an invalid or inappropriate algorithm parameter
+     * @throws NoSuchAlgorithmException           Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     public MyKeyPair() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         KeyPair keyPair = Keys.generate();
@@ -32,6 +38,7 @@ public class MyKeyPair {
      *
      * @param myPublicKeyBytes  Public Key in byte[]
      * @param myPrivateKeyBytes Private Key in byte[]
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     private MyKeyPair(byte[] myPublicKeyBytes, byte[] myPrivateKeyBytes) throws GeneralSecurityException {
         this.myPublicKey = Tools.toPublicKey(myPublicKeyBytes);
@@ -42,6 +49,8 @@ public class MyKeyPair {
      * Load .MyKeyPair or generate a new one and return a MyKeyPair
      *
      * @return Return a MyKeyPair
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     * @throws IOException              Throws IOException if there is an I/O exception
      */
     public static MyKeyPair load() throws GeneralSecurityException, IOException {
         if (Tools.isFileExists(filename)) {
@@ -75,6 +84,8 @@ public class MyKeyPair {
 
     /**
      * Save MyKeyPair
+     *
+     * @throws IOException Throws IOException if there is an I/O exception
      */
     public void save() throws IOException {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
