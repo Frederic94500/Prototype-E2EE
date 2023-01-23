@@ -214,12 +214,12 @@ public class Tools {
     }
 
     /**
-     * Get user input, special for parser
+     * Get user input using nextLine() method
      *
      * @param sentence Sentence for the input
      * @return Return user input
      */
-    public static String getInputParser(String sentence) {
+    public static String getInput(String sentence) {
         System.out.print(sentence);
         Scanner scanner = new Scanner(System.in);
 

@@ -42,7 +42,7 @@ public class ConversationsMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
-                cipherMenu(scanner, secretBuild);
+                cipherMenu(secretBuild);
             } else if (input == 2) {
                 decipherMenu(scanner, secretBuild);
             } else if (input == 3) {
@@ -56,17 +56,16 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Cipher a message
      *
-     * @param scanner     User input
      * @param secretBuild A conversation
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private void cipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
+    private void cipherMenu(SecretBuild secretBuild) throws GeneralSecurityException {
         boolean cli = true;
         String input;
         SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
 
         do {
-            input = Tools.getInput(scanner, "Please type your message to cipher (0 = return back):\n");
+            input = Tools.getInput("Please type your message to cipher (0 = return back):\n");
             if (input.equals("0")) {
                 cli = false;
             } else {
