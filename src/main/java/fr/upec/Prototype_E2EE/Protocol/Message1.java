@@ -1,30 +1,39 @@
 package fr.upec.Prototype_E2EE.Protocol;
 
+import fr.upec.Prototype_E2EE.Tools;
+
 import java.nio.ByteBuffer;
+import java.security.*;
+import java.security.spec.ECGenParameterSpec;
 
 /**
  * Object for Message 1
- * <pre>long = 8 bytes
- * int = 4 bytes
- * pubKey = 91 bytes
- * Message 1 total size = 103 bytes</pre>
+ * <pre>timestamp = long = 8 bytes
+ * nonce = byte[64] = 64 bytes
+ * DHKeyPair -> PublicKey = 120 bytes
+ * Message 1 total size = 192 bytes</pre>
  */
 public class Message1 {
     private final long timestamp;
-    private final int nonce;
-    private final byte[] pubKey;
+    private final byte[] nonce;
+    private final KeyPair ECKeyPair;
 
     /**
      * Message1 Constructor
      *
      * @param timestamp UNIX Timestamp
      * @param nonce     Nonce (salt)
-     * @param pubKey    PublicKey as Base64
      */
-    public Message1(long timestamp, int nonce, byte[] pubKey) {
+    public Message1(long timestamp, int nonce) throws GeneralSecurityException {
         this.timestamp = timestamp;
-        this.nonce = nonce;
-        this.pubKey = pubKey;
+
+        SecureRandom random = Tools.generateSecureRandom();
+        random.setSeed(nonce);
+        this.nonce = random.generateSeed(64);
+
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        keyPairGenerator.initialize(new ECGenParameterSpec("secp384r1"), Tools.generateSecureRandom());
+        this.ECKeyPair = keyPairGenerator.generateKeyPair();
     }
 
     /**
@@ -33,10 +42,10 @@ public class Message1 {
      * @return Return Message1 as byte[]
      */
     public byte[] toBytes() {
-        ByteBuffer buffer = ByteBuffer.allocate(103);
+        ByteBuffer buffer = ByteBuffer.allocate(192);
         buffer.putLong(timestamp);
-        buffer.putInt(nonce);
-        buffer.put(pubKey);
+        buffer.put(nonce);
+        buffer.put(ECKeyPair.getPublic().getEncoded());
         return buffer.array();
     }
 
@@ -54,16 +63,25 @@ public class Message1 {
      *
      * @return Return Nonce
      */
-    public int getNonce() {
+    public byte[] getNonce() {
         return nonce;
     }
 
     /**
-     * Getter for Public Key
+     * Get Private key
      *
-     * @return Return Public Key as Base64
+     * @return Return the Private key
      */
-    public byte[] getPubKey() {
-        return pubKey;
+    public PrivateKey getPrivateKey() {
+        return ECKeyPair.getPrivate();
+    }
+
+    /**
+     * get Public key
+     *
+     * @return Return the Public key
+     */
+    public PublicKey getPublicKey() {
+        return ECKeyPair.getPublic();
     }
 }

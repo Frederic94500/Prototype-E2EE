@@ -8,6 +8,7 @@ import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -23,8 +24,8 @@ public class StartConversationMenu implements InterfaceCLI {
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      * @throws IOException              Throws IOException if there is an I/O exception
      */
-    private SecretBuild message1(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
-        Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce(), myState.getMyPublicKey().getEncoded());
+    private SecretBuild message1Menu(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
+        Message1 myMessage1 = new Message1(Tools.getCurrentTime(), myState.getMyNonce());
         myState.incrementMyNonce();
         myState.save();
         System.out.println("Please copy the Message 1 and transfer to your recipient:");
@@ -38,7 +39,7 @@ public class StartConversationMenu implements InterfaceCLI {
                 return null;
             }
             try {
-                secretBuild = Communication.handleMessage1(myState, myMessage1, inputOtherMessage1);
+                secretBuild = Communication.handleMessage1(myMessage1, inputOtherMessage1);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
@@ -56,28 +57,29 @@ public class StartConversationMenu implements InterfaceCLI {
      * @return Return a boolean if it is correct
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private boolean message2(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
+    private String message2Menu(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String myMessage2 = Communication.createMessage2(myState.getMyPrivateKey(), mySecretBuild);
         System.out.println("Please copy the Message 2 and transfer to your recipient: ");
         System.out.println(myMessage2 + "\n");
 
         String input;
-        boolean pass = false;
+        String pass = null;
         do {
             input = Tools.getInput(scanner, "Please paste the Message 2 from your sender (0 = return back): \n");
             if (input.equals("0")) {
-                return false;
+                return null;
             } else {
                 try {
-                    pass = Communication.handleMessage2(mySecretBuild, input);
-                    pass = true;
+                    pass = Communication.handleMessage2(myState.getMyDirectory(), mySecretBuild, input);
+                } catch (NoSuchElementException e) {
+                    System.out.println(e.getMessage());
                 } catch (Exception e) {
                     System.out.println("This is not the expected Message 2!");
                 }
             }
-        } while (!pass);
+        } while (pass == null);
 
-        return true;
+        return pass;
     }
 
     /**
@@ -90,15 +92,16 @@ public class StartConversationMenu implements InterfaceCLI {
      */
     @Override
     public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
-        SecretBuild message2 = message1(scanner, myState);
+        SecretBuild message2 = message1Menu(scanner, myState);
         if (message2 != null) {
             System.out.println();
-            if (message2(scanner, myState, message2)) {
+            String name = message2Menu(scanner, myState, message2);
+            if (name != null) {
                 System.out.println();
                 myState.addAConversation(message2);
                 myState.save();
 
-                System.out.println("Conversation with " + myState.getMyDirectory().getKeyName(message2.getOtherPubKey()) + " has been created!\n");
+                System.out.println("Conversation with " + name + " has been created!\n");
             }
         }
     }

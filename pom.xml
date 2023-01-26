@@ -6,7 +6,7 @@
 
     <groupId>fr.upec.Prototype_E2EE</groupId>
     <artifactId>E2EE</artifactId>
-    <version>0.2.2</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>Prototype_E2EE</name>
     <url>https://sciences-tech.u-pec.fr/</url>

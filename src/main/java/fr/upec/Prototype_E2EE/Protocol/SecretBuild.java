@@ -10,21 +10,22 @@ import java.util.Arrays;
  * <pre>MUST BE HIDDEN!!! CONTAINS SENSITIVE INFORMATION!!!
  * long myDate = 8 bytes
  * long otherDate = 8 bytes
- * int myNonce = 4 bytes
- * int otherNonce = 4 bytes
- * byte[] myPubKey = 91 bytes
- * byte[] otherPubKey = 91 bytes
+ * byte[64] myNonce = 64 bytes
+ * byte[64] otherNonce = 64 bytes
+ * byte[] myPubKey = 120 bytes
+ * byte[] otherPubKey = 120 bytes
  * byte[] symKey = 32 bytes
- * SecretBuild total size = 238 bytes</pre>
+ * SecretBuild total size = 416 bytes</pre>
  */
 public class SecretBuild {
     private final long myDate;
     private final long otherDate;
-    private final int myNonce;
-    private final int otherNonce;
+    private final byte[] myNonce;
+    private final byte[] otherNonce;
     private final byte[] myPubKey;
     private final byte[] otherPubKey;
     private final byte[] symKey;
+    private String name;
 
     /**
      * SecretBuild Constructor
@@ -37,7 +38,7 @@ public class SecretBuild {
      * @param otherPubKey My Public Key as Base64
      * @param symKey      Symmetric Key as Base64
      */
-    public SecretBuild(long myDate, long otherDate, int myNonce, int otherNonce, byte[] myPubKey, byte[] otherPubKey, byte[] symKey) {
+    public SecretBuild(long myDate, long otherDate, byte[] myNonce, byte[] otherNonce, byte[] myPubKey, byte[] otherPubKey, byte[] symKey) {
         this.myDate = myDate;
         this.otherDate = otherDate;
         this.myNonce = myNonce;
@@ -70,11 +71,11 @@ public class SecretBuild {
     public SecretBuild(byte[] conversation) {
         this.myDate = Tools.toLong(conversation, 0, 8);
         this.otherDate = Tools.toLong(conversation, 8, 16);
-        this.myNonce = Tools.toInteger(conversation, 16, 20);
-        this.otherNonce = Tools.toInteger(conversation, 20, 24);
-        this.myPubKey = Arrays.copyOfRange(conversation, 24, 115);
-        this.otherPubKey = Arrays.copyOfRange(conversation, 115, 206);
-        this.symKey = Arrays.copyOfRange(conversation, 206, 238);
+        this.myNonce = Arrays.copyOfRange(conversation, 16, 80);
+        this.otherNonce = Arrays.copyOfRange(conversation, 80, 144);
+        this.myPubKey = Arrays.copyOfRange(conversation, 144, 264);
+        this.otherPubKey = Arrays.copyOfRange(conversation, 264, 384);
+        this.symKey = Arrays.copyOfRange(conversation, 384, 416);
     }
 
     /**
@@ -97,11 +98,11 @@ public class SecretBuild {
      * @return Return SecretBuild as byte[]
      */
     public byte[] toBytesWithoutSymKey() {
-        ByteBuffer buffer = ByteBuffer.allocate(206);
+        ByteBuffer buffer = ByteBuffer.allocate(384);
         buffer.putLong(myDate);
         buffer.putLong(otherDate);
-        buffer.putInt(myNonce);
-        buffer.putInt(otherNonce);
+        buffer.put(myNonce);
+        buffer.put(otherNonce);
         buffer.put(myPubKey);
         buffer.put(otherPubKey);
         return buffer.array();
@@ -113,11 +114,11 @@ public class SecretBuild {
      * @return Return SecretBuild as byte[]
      */
     public byte[] toBytesWithSymKey() {
-        ByteBuffer buffer = ByteBuffer.allocate(238);
+        ByteBuffer buffer = ByteBuffer.allocate(416);
         buffer.putLong(myDate);
         buffer.putLong(otherDate);
-        buffer.putInt(myNonce);
-        buffer.putInt(otherNonce);
+        buffer.put(myNonce);
+        buffer.put(otherNonce);
         buffer.put(myPubKey);
         buffer.put(otherPubKey);
         assert symKey != null;
@@ -148,7 +149,7 @@ public class SecretBuild {
      *
      * @return Return my nonce
      */
-    public int getMyNonce() {
+    public byte[] getMyNonce() {
         return myNonce;
     }
 
@@ -157,7 +158,7 @@ public class SecretBuild {
      *
      * @return Return other nonce
      */
-    public int getOtherNonce() {
+    public byte[] getOtherNonce() {
         return otherNonce;
     }
 
@@ -178,4 +179,24 @@ public class SecretBuild {
     public byte[] getSymKey() {
         return symKey;
     }
+
+    /**
+     * Get name of the user for the message
+     *
+     * @return Return name user
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the name of the user for the message
+     *
+     * @param name Name of the user for the message
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
 }

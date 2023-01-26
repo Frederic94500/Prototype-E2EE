@@ -12,7 +12,7 @@ Ce prototype nécessite l'utilisation de Maven
 
 ## Exécution
 
-`java -jar target/E2EE-0.2.2.jar`
+`java -jar target/E2EE-0.3-SNAPSHOT.jar`
 
 ## Compilation
 

@@ -1,11 +1,15 @@
 package fr.upec.Prototype_E2EE.MyState;
 
+import fr.upec.Prototype_E2EE.Protocol.Sign;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.*;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * MyDirectory contains a list of persons
@@ -173,5 +177,23 @@ public class MyDirectory {
             }
         }
         return null;
+    }
+
+    /**
+     * Get the user who signed the message
+     *
+     * @param signedMessage    Signed message
+     * @param expectedMessage2 Expected Message 2
+     * @return Return the name of the signer or null if not found
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public String getSigner(byte[] signedMessage, String expectedMessage2) throws GeneralSecurityException {
+        for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+            PublicKey otherPublicKey = Tools.toPublicKey(entry.getValue());
+            if (Sign.verify(otherPublicKey, signedMessage, expectedMessage2)) {
+                return entry.getKey();
+            }
+        }
+        throw new NoSuchElementException("Unknown sender!");
     }
 }

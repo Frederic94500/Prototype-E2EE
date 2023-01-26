@@ -47,38 +47,38 @@ public class MainTest {
 
     @Test
     public void testMessage1() throws GeneralSecurityException {
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce());
 
         user2.getMyDirectory().addPerson("user1", user1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
-        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(message1User2, message1User1For2);
 
         user1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2For1);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(message1User1, message1User2For1);
 
         assertEquals(message1User1.getTimestamp(), secretBuildUser2.getOtherDate());
-        assertEquals(message1User1.getNonce(), secretBuildUser2.getOtherNonce());
-        assertArrayEquals(message1User1.getPubKey(), secretBuildUser2.getOtherPubKey());
+        assertArrayEquals(message1User1.getNonce(), secretBuildUser2.getOtherNonce());
+        assertArrayEquals(message1User1.getPublicKey().getEncoded(), secretBuildUser2.getOtherPubKey());
 
         assertEquals(message1User2.getTimestamp(), secretBuildUser1.getOtherDate());
-        assertEquals(message1User2.getNonce(), secretBuildUser1.getOtherNonce());
-        assertArrayEquals(message1User2.getPubKey(), secretBuildUser1.getOtherPubKey());
+        assertArrayEquals(message1User2.getNonce(), secretBuildUser1.getOtherNonce());
+        assertArrayEquals(message1User2.getPublicKey().getEncoded(), secretBuildUser1.getOtherPubKey());
     }
 
     @Test
     public void testMessage2() throws Exception {
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce(), user1.getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, user1.getMyNonce());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce());
 
         user2.getMyDirectory().addPerson("user1", user1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
-        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(message1User2, message1User1For2);
 
         user1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(user1, message1User1, message1User2For1);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(message1User1, message1User2For1);
 
         assertTrue(secretBuildUser1.equals(secretBuildUser2));
         sbUser1 = secretBuildUser1;
@@ -87,8 +87,8 @@ public class MainTest {
         String message2User1 = Communication.createMessage2(user1.getMyPrivateKey(), secretBuildUser1);
         String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
-        assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
-        assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
+        assertEquals("user1", Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1));
+        assertEquals("user2", Communication.handleMessage2(user1.getMyDirectory(), secretBuildUser1, message2User2));
     }
 
     @Test
@@ -198,24 +198,24 @@ public class MainTest {
         assertEquals(myStateUser1.getMyNonce(), myStateFile.getMyNonce());
 
         //Create Conversation
-        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myStateUser1.getMyNonce(), myStateUser1.getMyPublicKey().getEncoded());
-        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce(), user2.getMyPublicKey().getEncoded());
+        Message1 message1User1 = new Message1(System.currentTimeMillis() / 1000L, myStateUser1.getMyNonce());
+        Message1 message1User2 = new Message1(System.currentTimeMillis() / 1000L, user2.getMyNonce());
 
         user2.getMyDirectory().addPerson("user1", myStateUser1.getMyPublicKey().getEncoded());
         String message1User1For2 = Communication.createMessage1(message1User1);
-        SecretBuild secretBuildUser2 = Communication.handleMessage1(user2, message1User2, message1User1For2);
+        SecretBuild secretBuildUser2 = Communication.handleMessage1(message1User2, message1User1For2);
 
         myStateUser1.getMyDirectory().addPerson("user2", user2.getMyPublicKey().getEncoded());
         String message1User2For1 = Communication.createMessage1(message1User2);
-        SecretBuild secretBuildUser1 = Communication.handleMessage1(myStateUser1, message1User1, message1User2For1);
+        SecretBuild secretBuildUser1 = Communication.handleMessage1(message1User1, message1User2For1);
 
         assertTrue(secretBuildUser1.equals(secretBuildUser2));
 
         String message2User1 = Communication.createMessage2(myStateUser1.getMyPrivateKey(), secretBuildUser1);
         String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
-        assertTrue(Communication.handleMessage2(secretBuildUser2, message2User1));
-        assertTrue(Communication.handleMessage2(secretBuildUser1, message2User2));
+        assertEquals("user1", Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1));
+        assertEquals("user2", Communication.handleMessage2(myStateUser1.getMyDirectory(), secretBuildUser1, message2User2));
         //End create Conversation
 
         //Add Conversation to MyState
