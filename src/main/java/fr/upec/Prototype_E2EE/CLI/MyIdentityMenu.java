@@ -19,11 +19,11 @@ public class MyIdentityMenu implements InterfaceCLI {
      */
     private void showMyPubKey(PublicKey publicKey) {
         System.out.println("Here is your public key:\n");
-        System.out.print("-----BEGIN EC PUBLIC KEY-----");
+        System.out.print("-----BEGIN PUBLIC KEY-----");
         byte[] pubKeyByte = publicKey.getEncoded();
         String publicKeyBase64 = Tools.toBase64(pubKeyByte);
         System.out.print(publicKeyBase64);
-        System.out.println("-----END EC PUBLIC KEY-----\n");
+        System.out.println("-----END PUBLIC KEY-----\n");
     }
 
     /**
