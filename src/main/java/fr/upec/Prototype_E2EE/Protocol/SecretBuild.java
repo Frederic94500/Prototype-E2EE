@@ -68,7 +68,7 @@ public class SecretBuild {
      *
      * @param conversation Known information
      */
-    public SecretBuild(byte[] conversation) {
+    public SecretBuild(String name, byte[] conversation) {
         this.myDate = Tools.toLong(conversation, 0, 8);
         this.otherDate = Tools.toLong(conversation, 8, 16);
         this.myNonce = Arrays.copyOfRange(conversation, 16, 80);
@@ -76,6 +76,7 @@ public class SecretBuild {
         this.myPubKey = Arrays.copyOfRange(conversation, 144, 264);
         this.otherPubKey = Arrays.copyOfRange(conversation, 264, 384);
         this.symKey = Arrays.copyOfRange(conversation, 384, 416);
+        this.name = name;
     }
 
     /**

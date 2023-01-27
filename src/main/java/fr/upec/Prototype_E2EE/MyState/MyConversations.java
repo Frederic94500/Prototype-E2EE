@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -47,7 +48,8 @@ public class MyConversations {
                 scanner.close();
                 String[] rawConversations = data.split(",");
                 for (String rawConversation : rawConversations) {
-                    myConversations.add(new SecretBuild(Tools.toBytes(rawConversation)));
+                    String[] splitConversation = rawConversation.split(":");
+                    myConversations.add(new SecretBuild(new String(Tools.toBytes(splitConversation[0])), Tools.toBytes(splitConversation[1])));
                 }
             }
         }
@@ -61,7 +63,7 @@ public class MyConversations {
      */
     public void save() throws IOException {
         String rawConversations = myConversations.stream()
-                .map(secretBuild -> Tools.toBase64(secretBuild.toBytesWithSymKey()))
+                .map(secretBuild -> Tools.toBase64(secretBuild.getName().getBytes(StandardCharsets.UTF_8)) + ":" + Tools.toBase64(secretBuild.toBytesWithSymKey()))
                 .collect(Collectors.joining(","));
 
         if (!Tools.isFileExists(filename)) {
