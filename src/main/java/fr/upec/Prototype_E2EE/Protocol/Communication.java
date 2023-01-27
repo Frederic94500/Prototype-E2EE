@@ -73,7 +73,7 @@ public class Communication {
 
         //Need to have an ID verification in Android
         byte[] signedMessage = Sign.sign(myPrivateKey, message2Base64);
-        byte[] cipheredSignedMessage = MessageCipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
+        byte[] cipheredSignedMessage = Cipher.cipher(toSecretKey(mySecretBuild.getSymKey()), signedMessage);
 
         return toBase64(cipheredSignedMessage);
     }
@@ -93,7 +93,7 @@ public class Communication {
         String expectedMessage2 = toBase64(otherSecretBuildBytes);
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
-        byte[] signedMessage = MessageCipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
+        byte[] signedMessage = Cipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);
 
         String validated = myDirectory.getSigner(signedMessage, expectedMessage2); //null == invalid
         mySecretBuild.setName(validated);

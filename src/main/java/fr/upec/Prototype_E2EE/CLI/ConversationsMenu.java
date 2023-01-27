@@ -2,7 +2,7 @@ package fr.upec.Prototype_E2EE.CLI;
 
 import fr.upec.Prototype_E2EE.MyState.MyConversations;
 import fr.upec.Prototype_E2EE.MyState.MyState;
-import fr.upec.Prototype_E2EE.Protocol.MessageCipher;
+import fr.upec.Prototype_E2EE.Protocol.Cipher;
 import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
@@ -69,7 +69,7 @@ public class ConversationsMenu implements InterfaceCLI {
             if (input.equals("0")) {
                 cli = false;
             } else {
-                byte[] cipheredMessageByte = MessageCipher.cipher(secretKey, input.getBytes(StandardCharsets.UTF_8));
+                byte[] cipheredMessageByte = Cipher.cipher(secretKey, input.getBytes(StandardCharsets.UTF_8));
                 System.out.println("Please copy and send the ciphered message to your receiver");
                 System.out.println(Tools.toBase64(cipheredMessageByte) + "\n");
             }
@@ -94,7 +94,7 @@ public class ConversationsMenu implements InterfaceCLI {
                 if (input.equals("0")) {
                     cli = false;
                 } else {
-                    byte[] decipheredMessageByte = MessageCipher.decipher(secretKey, Tools.toBytes(input));
+                    byte[] decipheredMessageByte = Cipher.decipher(secretKey, Tools.toBytes(input));
                     System.out.println("Here is your deciphered message:");
                     System.out.println(new String(decipheredMessageByte) + "\n");
                 }

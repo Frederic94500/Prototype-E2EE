@@ -104,11 +104,11 @@ public class MainTest {
     @Test
     public void testCipherDecipher() throws GeneralSecurityException {
         String textString = "Moeagare Moeagare GANDAMU!";
-        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(sbUser1.getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        byte[] cipheredTextUser1 = Cipher.cipher(Tools.toSecretKey(sbUser1.getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
-        assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)));
+        assertEquals(textString, new String(Cipher.decipher(Tools.toSecretKey(sbUser2.getSymKey()), cipheredTextFromUser1)));
     }
 
     @Test
@@ -184,6 +184,16 @@ public class MainTest {
     }
 
     @Test
+    public void testPBKDF2() throws GeneralSecurityException {
+        String test = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==";
+
+        byte[] output = Cipher.cipherPBKDF2("1234".toCharArray(), test.getBytes(StandardCharsets.UTF_8));
+        System.out.println(Tools.toBase64(output));
+
+        assertEquals(test, new String(Cipher.decipherPBKDF2("1234".toCharArray(), output)));
+    }
+
+    @Test
     public void testAll() throws GeneralSecurityException, IOException {
         //Create MyState
         MyState myStateUser1 = MyState.load();
@@ -229,11 +239,11 @@ public class MainTest {
 
         //Test cipher/decipher message
         String textString = "Another bites the dust";
-        byte[] cipheredTextUser1 = MessageCipher.cipher(Tools.toSecretKey(myConversationsUser1.getConversation(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        byte[] cipheredTextUser1 = Cipher.cipher(Tools.toSecretKey(myConversationsUser1.getConversation(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);
-        assertEquals(textString, new String(MessageCipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
+        assertEquals(textString, new String(Cipher.decipher(Tools.toSecretKey(secretBuildUser2.getSymKey()), cipheredTextFromUser1)));
 
         //Delete a Conversation
         myConversationsUser1.deleteConversation(myConversationsUser1.getConversation(0));
