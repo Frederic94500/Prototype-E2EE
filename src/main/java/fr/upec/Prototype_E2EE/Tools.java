@@ -2,6 +2,8 @@ package fr.upec.Prototype_E2EE;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +23,11 @@ import static java.util.Arrays.copyOfRange;
  * Frequently used functions
  */
 public class Tools {
+    /**
+     * PBKDF2 Number of iteration
+     */
+    public static final int PBKDF2_ITERATION = 1048576;
+
     /**
      * Get the current time as UNIX Timestamp
      *
@@ -83,6 +90,34 @@ public class Tools {
     }
 
     /**
+     * Get Secret Key with PBKDF2
+     *
+     * @param password   Password
+     * @param salt       Salt
+     * @param iterations Iterations for PBKDF2
+     * @return Return SecretKey AES
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static SecretKey getSecretKeyPBKDF2(char[] password, byte[] salt, int iterations) throws GeneralSecurityException {
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+        PBEKeySpec pbeKeySpec = new PBEKeySpec(password, salt, iterations, 256);
+        SecretKey temp = keyFactory.generateSecret(pbeKeySpec);
+        return new SecretKeySpec(temp.getEncoded(), "AES");
+    }
+
+    /**
+     * Get Secret Key with PBKDF2
+     *
+     * @param password Password
+     * @param salt     Salt
+     * @return Return SecretKey AES
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static SecretKey getSecretKey(char[] password, byte[] salt) throws GeneralSecurityException {
+        return getSecretKeyPBKDF2(password, salt, PBKDF2_ITERATION);
+    }
+
+    /**
      * Generate a SecureRandom using AES(256)
      *
      * @return Return a SecureRandom
@@ -92,6 +127,36 @@ public class Tools {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
         return new SecureRandom(keyGenerator.generateKey().getEncoded());
+    }
+
+    /**
+     * Generate Random Bytes
+     *
+     * @param size Size of the list
+     * @return Return Random Bytes in list
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     */
+    public static byte[] generateRandomBytes(int size) throws NoSuchAlgorithmException {
+        return generateSecureRandom().generateSeed(size);
+    }
+
+    /**
+     * Verify if the Public Key is an EC key
+     *
+     * @param pubKey EC Public Key
+     * @return Return if is EC Key
+     */
+    public static boolean isECPubKey(byte[] pubKey) {
+        try {
+            toPublicKey(pubKey);
+        } catch (GeneralSecurityException e) {
+            if (new String(pubKey).equals("0")) {
+                return false;
+            }
+            System.out.println("Not a Public Key!");
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -228,25 +293,6 @@ public class Tools {
             return "0";
         }
         return input;
-    }
-
-    /**
-     * Verify if the Public Key is an EC key
-     *
-     * @param pubKey EC Public Key
-     * @return Return if is EC Key
-     */
-    public static boolean isECPubKey(byte[] pubKey) {
-        try {
-            toPublicKey(pubKey);
-        } catch (GeneralSecurityException e) {
-            if (new String(pubKey).equals("0")) {
-                return false;
-            }
-            System.out.println("Not a Public Key!");
-            return false;
-        }
-        return true;
     }
 
     /**

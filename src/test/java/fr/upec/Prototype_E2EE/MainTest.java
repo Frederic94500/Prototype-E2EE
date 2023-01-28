@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.crypto.AEADBadTagException;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
@@ -187,10 +189,20 @@ public class MainTest {
     public void testPBKDF2() throws GeneralSecurityException {
         String test = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==";
 
-        byte[] output = Cipher.cipherPBKDF2("1234".toCharArray(), test.getBytes(StandardCharsets.UTF_8));
-        System.out.println(Tools.toBase64(output));
+        byte[] salt = Tools.toBytes("cKpdYGz6EXp5QctsIOsmVSn7ewGwwx5fW8TdA7N+5Ho=");
+        SecretKey totoSecretKeyPBKDF2 = Tools.getSecretKeyPBKDF2("toto".toCharArray(), salt, 1000);
+        byte[] output = Cipher.cipher(totoSecretKeyPBKDF2, test.getBytes(StandardCharsets.UTF_8));
 
-        assertEquals(test, new String(Cipher.decipherPBKDF2("1234".toCharArray(), output)));
+        assertEquals("ViK7x2IDuqGu13hNAdjMRXaDmu0nSj93KPt1UvylebE=", Tools.toBase64(totoSecretKeyPBKDF2.getEncoded()));
+        assertEquals(test, new String(Cipher.decipher(totoSecretKeyPBKDF2, output)));
+
+
+        byte[] salt2 = Tools.generateRandomBytes(64);
+        SecretKey secretKeyPBKDF2 = Tools.getSecretKeyPBKDF2("1234".toCharArray(), salt2, Tools.PBKDF2_ITERATION);
+        byte[] output2 = Cipher.cipher(secretKeyPBKDF2, test.getBytes(StandardCharsets.UTF_8));
+
+        assertEquals(test, new String(Cipher.decipher(secretKeyPBKDF2, output2)));
+        assertThrows(AEADBadTagException.class, () -> Cipher.decipher(totoSecretKeyPBKDF2, output2));
     }
 
     @Test

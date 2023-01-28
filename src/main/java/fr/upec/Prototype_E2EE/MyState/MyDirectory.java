@@ -4,6 +4,7 @@ import fr.upec.Prototype_E2EE.Protocol.Sign;
 import fr.upec.Prototype_E2EE.Tools;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ public class MyDirectory {
         FileWriter fw = new FileWriter(filename);
         BufferedWriter bw = new BufferedWriter(fw);
         for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
-            String encodedNameString = Tools.toBase64(entry.getKey().getBytes());
+            String encodedNameString = Tools.toBase64(entry.getKey().getBytes(StandardCharsets.UTF_8));
             String encodedPubKey = Tools.toBase64(entry.getValue());
 
             bw.write(encodedNameString + ":" + encodedPubKey);
