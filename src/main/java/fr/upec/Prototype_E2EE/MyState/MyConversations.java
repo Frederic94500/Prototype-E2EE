@@ -77,6 +77,7 @@ public class MyConversations {
             byte[] cipheredOutput = Cipher.cipher(secretKey, rawConversations.getBytes(StandardCharsets.UTF_8));
             Tools.writeToFile(FILENAME, cipheredOutput);
         } else {
+            Tools.deleteFile(FILENAME);
             Tools.createFile(FILENAME);
         }
     }
