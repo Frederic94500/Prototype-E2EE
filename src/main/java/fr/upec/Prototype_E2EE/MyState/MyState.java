@@ -3,6 +3,7 @@ package fr.upec.Prototype_E2EE.MyState;
 import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,23 +22,25 @@ public class MyState {
     /**
      * Filename
      */
-    public static final String filename = ".MyState";
+    public static final String FILENAME = ".MyState";
     private final MyDirectory myDirectory;
     private final MyConversations myConversations;
+    private final String hashedPassword;
     private MyKeyPair myKeyPair;
     private int myNonce;
 
     /**
-     * Create MyState
+     * Create MyState if it is the first start
      *
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      * @throws IOException              Throws IOException if there is an I/O exception
      */
-    public MyState() throws GeneralSecurityException, IOException {
+    public MyState(String hashedPassword) throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
         this.myDirectory = new MyDirectory();
         this.myConversations = new MyConversations();
         this.myNonce = 0;
+        this.hashedPassword = hashedPassword;
     }
 
     /**
@@ -48,11 +51,12 @@ public class MyState {
      * @param myConversations MyConversations
      * @param myNonce         MyNonce
      */
-    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, MyConversations myConversations, int myNonce) {
+    public MyState(MyKeyPair myKeyPair, MyDirectory myDirectory, MyConversations myConversations, int myNonce, String hashedPassword) {
         this.myKeyPair = myKeyPair;
         this.myDirectory = myDirectory;
         this.myConversations = myConversations;
         this.myNonce = myNonce;
+        this.hashedPassword = hashedPassword;
     }
 
     /**
@@ -62,24 +66,25 @@ public class MyState {
      * @throws IOException              Throws IOException if there is an I/O exception
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static MyState load() throws IOException, GeneralSecurityException {
-        if (Tools.isFileExists(filename)) {
-            Scanner scanner = new Scanner(new File(filename));
+    public static MyState load(SecretKey secretKey, String hashedPassword) throws IOException, GeneralSecurityException {
+        if (Tools.isFileExists(FILENAME)) {
+            Scanner scanner = new Scanner(new File(FILENAME));
             String data = scanner.nextLine();
             scanner.close();
             String[] rawData = data.split(",");
             if (isEqualsDigest(rawData)) {
-                return new MyState(MyKeyPair.load(),
-                        new MyDirectory(),
-                        new MyConversations(),
-                        ByteBuffer.wrap(Tools.toBytes(rawData[3])).getInt());
+                return new MyState(MyKeyPair.load(secretKey),
+                        new MyDirectory(secretKey),
+                        new MyConversations(secretKey),
+                        ByteBuffer.wrap(Tools.toBytes(rawData[3])).getInt(),
+                        hashedPassword);
             } else {
                 throw new IllegalStateException("""
                         WARNING!!! YOUR FILES HAS BEEN COMPROMISED!
                         PLEASE ERASE .MyState, .MyKeyPair, .MyDirectory AND .MyConversations!!!""");
             }
         } else {
-            MyState myState = new MyState();
+            MyState myState = new MyState(hashedPassword);
             myState.save();
             return myState;
         }
@@ -94,9 +99,9 @@ public class MyState {
      * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      */
     private static boolean isEqualsDigest(String[] rawData) throws IOException, NoSuchAlgorithmException {
-        return rawData[0].equals(Tools.digest(MyKeyPair.filename))
-                && rawData[1].equals(Tools.digest(MyDirectory.filename))
-                && rawData[2].equals(Tools.digest(MyConversations.filename));
+        return rawData[0].equals(Tools.digest(MyKeyPair.FILENAME))
+                && rawData[1].equals(Tools.digest(MyDirectory.FILENAME))
+                && rawData[2].equals(Tools.digest(MyConversations.FILENAME));
     }
 
 
@@ -166,19 +171,23 @@ public class MyState {
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public void save() throws IOException, GeneralSecurityException {
-        myKeyPair.save();
-        myDirectory.saveIntoFile();
-        myConversations.save();
-        String checksumMyKeyPair = Tools.digest(MyKeyPair.filename);
-        String checksumMyDirectory = Tools.digest(MyDirectory.filename);
-        String checksumMyConversations = Tools.digest(MyConversations.filename);
-        String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
+        byte[] salt = Tools.generateRandomBytes(32);
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2(hashedPassword.toCharArray(), salt);
 
-        if (!Tools.isFileExists(filename)) {
-            Tools.createFile(filename);
+        myKeyPair.save(secretKey);
+        myDirectory.saveIntoFile(secretKey);
+        myConversations.save(secretKey);
+        String checksumMyKeyPair = Tools.digest(MyKeyPair.FILENAME);
+        String checksumMyDirectory = Tools.digest(MyDirectory.FILENAME);
+        String checksumMyConversations = Tools.digest(MyConversations.FILENAME);
+        String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
+        String saltBase64 = Tools.toBase64(salt);
+
+        if (!Tools.isFileExists(FILENAME)) {
+            Tools.createFile(FILENAME);
         }
-        FileWriter writer = new FileWriter(filename);
-        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + checksumMyConversations + "," + myNonceBase64);
+        FileWriter writer = new FileWriter(FILENAME);
+        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + checksumMyConversations + "," + myNonceBase64 + "," + saltBase64);
         writer.close();
     }
 
@@ -208,7 +217,6 @@ public class MyState {
      */
     public void replaceMyKeyPair() throws GeneralSecurityException, IOException {
         this.myKeyPair = new MyKeyPair();
-        this.myKeyPair.save();
         this.save();
     }
 }

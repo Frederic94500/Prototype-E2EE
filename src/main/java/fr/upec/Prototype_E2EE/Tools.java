@@ -1,13 +1,20 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
+import fr.upec.Prototype_E2EE.MyState.MyState;
+import fr.upec.Prototype_E2EE.Protocol.Cipher;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
@@ -113,7 +120,7 @@ public class Tools {
      * @return Return SecretKey AES
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static SecretKey getSecretKey(char[] password, byte[] salt) throws GeneralSecurityException {
+    public static SecretKey getSecretKeyPBKDF2(char[] password, byte[] salt) throws GeneralSecurityException {
         return getSecretKeyPBKDF2(password, salt, PBKDF2_ITERATION);
     }
 
@@ -235,6 +242,119 @@ public class Tools {
     }
 
     /**
+     * Hashing the password
+     *
+     * @param password Password
+     * @return Return a hashed password
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     */
+    public static String hashPassword(String password) throws NoSuchAlgorithmException {
+        byte[] digest = MessageDigest.getInstance("SHA-512").digest(password.getBytes(StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Create a new SecretKey PBKDF2 for the first time open
+     *
+     * @return Return SecretKey PBKDF2
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static SecretKey createSecretKey(String hashedPassword) throws GeneralSecurityException {
+        byte[] salt = generateRandomBytes(32);
+        return getSecretKeyPBKDF2(hashedPassword.toCharArray(), salt);
+    }
+
+    /**
+     * Confirm the password
+     *
+     * @return Return a hashed password
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     */
+    public static String getConfirmPassword() throws NoSuchAlgorithmException {
+        String password;
+        String confirmPassword;
+        do {
+            password = getInput("Create the password: ");
+            if (password.equals("0")) {
+                System.exit(0);
+            }
+            confirmPassword = getInput("Confirm the password: ");
+            if (confirmPassword.equals("0")) {
+                System.exit(0);
+            }
+            if (!password.equals(confirmPassword)) {
+                System.out.println("Not the same password!");
+            }
+        } while (!password.equals(confirmPassword));
+        return hashPassword(password);
+    }
+
+    /**
+     * Load a SecretKey PBKDF2
+     *
+     * @return Return SecretKey PBKDF2
+     * @throws FileNotFoundException    Throws FileNotFoundException if there file is not found
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static SecretKey loadSecretKey(String hashedPassword) throws FileNotFoundException, GeneralSecurityException {
+        Scanner scanner = new Scanner(new File(MyState.FILENAME));
+        String data = scanner.nextLine();
+        String[] rawData = data.split(",");
+
+        return getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.toBytes(rawData[4]));
+    }
+
+    /**
+     * Get the correct password
+     *
+     * @return Return a hashed password
+     * @throws FileNotFoundException    Throws FileNotFoundException if there file is not found
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static String getPassword() throws FileNotFoundException, GeneralSecurityException {
+        Scanner scanner = new Scanner(new File(MyState.FILENAME));
+        String data = scanner.nextLine();
+        String[] rawData = data.split(",");
+
+        String password;
+        SecretKey secretKey;
+        boolean cli = true;
+        do {
+            password = getInput("Type your password: ");
+            if (password.equals("0")) {
+                System.exit(0);
+            }
+            secretKey = getSecretKeyPBKDF2(password.toCharArray(), Tools.toBytes(rawData[4]));
+            if (testSecretKey(secretKey)) {
+                cli = false;
+            }
+        } while (cli);
+        return hashPassword(password);
+    }
+
+    /**
+     * Test the SecretKey
+     *
+     * @param secretKey SecretKey PBKDF2
+     * @return Return a boolean if the SecretKey is correct
+     * @throws FileNotFoundException Throws FileNotFoundException if there file is not found
+     */
+    public static Boolean testSecretKey(SecretKey secretKey) throws FileNotFoundException {
+        try {
+            Scanner scanner = new Scanner(new File(MyKeyPair.FILENAME));
+            Cipher.cipher(secretKey, Tools.toBytes(scanner.nextLine()));
+        } catch (GeneralSecurityException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get user input for option in CLI
      *
      * @param scanner Scanner for user input
@@ -302,7 +422,7 @@ public class Tools {
      * @return Return parsed Public Key
      */
     public static String keyParser(String keyPem) {
-        if (keyPem.contains("----BEGIN EC PUBLIC KEY-----")) {
+        if (keyPem.contains("----BEGIN PUBLIC KEY-----")) {
             String[] tokens = keyPem.split("-----");
             for (String token : tokens) {
                 try {
@@ -316,5 +436,21 @@ public class Tools {
             return keyPem;
         }
         throw new IllegalArgumentException("Can't find public key!");
+    }
+
+    /**
+     * Write to file
+     *
+     * @param filename Filename
+     * @param input    Input to write
+     * @throws IOException Throws IOException if there is an I/O exception
+     */
+    public static void writeToFile(String filename, byte[] input) throws IOException {
+        if (!isFileExists(filename)) {
+            createFile(filename);
+        }
+        FileWriter writer = new FileWriter(filename);
+        writer.write(toBase64(input));
+        writer.close();
     }
 }

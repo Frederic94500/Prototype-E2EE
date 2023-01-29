@@ -27,24 +27,24 @@ public class MainTest {
 
     @BeforeClass
     public static void setupClass() throws GeneralSecurityException, IOException {
-        user1 = new MyState();
-        user2 = new MyState();
+        user1 = new MyState(Tools.hashPassword("toto"));
+        user2 = new MyState(Tools.hashPassword("tata"));
     }
 
     @Before
     public void deleteFilesBefore() {
-        Tools.deleteFile(MyState.filename);
-        Tools.deleteFile(MyKeyPair.filename);
-        Tools.deleteFile(MyDirectory.filename);
-        Tools.deleteFile(MyConversations.filename);
+        Tools.deleteFile(MyState.FILENAME);
+        Tools.deleteFile(MyKeyPair.FILENAME);
+        Tools.deleteFile(MyDirectory.FILENAME);
+        Tools.deleteFile(MyConversations.FILENAME);
     }
 
     @After
     public void deleteFilesAfter() {
-        Tools.deleteFile(MyState.filename);
-        Tools.deleteFile(MyKeyPair.filename);
-        Tools.deleteFile(MyDirectory.filename);
-        Tools.deleteFile(MyConversations.filename);
+        Tools.deleteFile(MyState.FILENAME);
+        Tools.deleteFile(MyKeyPair.FILENAME);
+        Tools.deleteFile(MyDirectory.FILENAME);
+        Tools.deleteFile(MyConversations.FILENAME);
     }
 
     @Test
@@ -115,9 +115,10 @@ public class MainTest {
 
     @Test
     public void testSaveAndLoadMyKeyPair() throws GeneralSecurityException, IOException {
-        MyKeyPair myKeyPair = MyKeyPair.load(); //Without File
-        myKeyPair.save();
-        MyKeyPair myKeyPairViaFile = MyKeyPair.load(); //With File
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2("1234".toCharArray(), Tools.generateRandomBytes(32), 1024);
+        MyKeyPair myKeyPair = new MyKeyPair(); //Without File
+        myKeyPair.save(secretKey);
+        MyKeyPair myKeyPairViaFile = MyKeyPair.load(secretKey); //With File
 
         assertArrayEquals(myKeyPair.getMyPublicKey().getEncoded(), myKeyPairViaFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myKeyPair.getMyPrivateKey().getEncoded(), myKeyPairViaFile.getMyPrivateKey().getEncoded());
@@ -125,10 +126,12 @@ public class MainTest {
 
     @Test
     public void testSaveAndLoadMyState() throws GeneralSecurityException, IOException {
-        MyState myState = new MyState();
+        String hashedPassword = Tools.hashPassword("1234");
+        MyState myState = new MyState(hashedPassword);
         myState.save();
 
-        MyState myStateFile = MyState.load();
+        SecretKey newSecretKey = Tools.loadSecretKey(hashedPassword);
+        MyState myStateFile = MyState.load(newSecretKey, hashedPassword);
 
         assertArrayEquals(myState.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myState.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());
@@ -136,7 +139,10 @@ public class MainTest {
     }
 
     @Test
-    public void testMyDirectory() throws IOException {
+    public void testMyDirectory() throws IOException, GeneralSecurityException {
+        String hashedPassword = Tools.hashPassword("1234");
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.generateRandomBytes(32), 1024);
+
         MyDirectory myDirectory = new MyDirectory();
         assertEquals(0, myDirectory.sizeOfDirectory());
 
@@ -146,36 +152,40 @@ public class MainTest {
         myDirectory.addPerson("user2", user2.getMyPublicKey().getEncoded());
         assertEquals(2, myDirectory.sizeOfDirectory());
 
-        myDirectory.saveIntoFile();
-        MyDirectory myDirectoryFile = new MyDirectory();
+        myDirectory.saveIntoFile(secretKey);
+        MyDirectory myDirectoryFile = new MyDirectory(secretKey);
 
         assertTrue(myDirectory.isInDirectory(user1.getMyPublicKey().getEncoded()));
         assertTrue(myDirectoryFile.isInDirectory(myDirectory.getPerson("user2")));
 
         myDirectory.deletePerson("user2");
         assertEquals(1, myDirectory.sizeOfDirectory());
-        myDirectory.saveIntoFile();
+        myDirectory.saveIntoFile(secretKey);
 
-        MyDirectory myDirectoryFile2 = new MyDirectory();
+        MyDirectory myDirectoryFile2 = new MyDirectory(secretKey);
         assertEquals(1, myDirectoryFile2.sizeOfDirectory());
     }
 
     @Test
     public void testReplaceMyKeyPair() throws GeneralSecurityException, IOException {
-        MyState myState = new MyState();
+        String hashedPassword = Tools.hashPassword("1234");
+
+        MyState myState = new MyState(hashedPassword);
         myState.save();
-        MyState myStateFile = MyState.load();
-        String digestFile = Tools.digest(MyKeyPair.filename);
+
+        SecretKey secretKey = Tools.loadSecretKey(hashedPassword);
+        MyState myStateFile = MyState.load(secretKey, hashedPassword);
+        String digestFile = Tools.digest(MyKeyPair.FILENAME);
 
         myState.replaceMyKeyPair();
 
         assertFalse(Arrays.equals(myStateFile.getMyPublicKey().getEncoded(), myState.getMyPublicKey().getEncoded()));
-        assertNotEquals(digestFile, Tools.digest(MyKeyPair.filename));
+        assertNotEquals(digestFile, Tools.digest(MyKeyPair.FILENAME));
     }
 
     @Test
     public void testParserPubKey() {
-        String pemKey = "-----BEGIN EC PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==-----END EC PUBLIC KEY-----";
+        String pemKey = "-----BEGIN PUBLIC KEY-----MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==-----END PUBLIC KEY-----";
         String pubKey = Tools.keyParser(pemKey);
         String reTestPubKey = Tools.keyParser(pubKey);
         String wrongPubKey = "I'm sorry, Dave. I'm afraid I can't do that.";
@@ -197,7 +207,7 @@ public class MainTest {
         assertEquals(test, new String(Cipher.decipher(totoSecretKeyPBKDF2, output)));
 
 
-        byte[] salt2 = Tools.generateRandomBytes(64);
+        byte[] salt2 = Tools.generateRandomBytes(32);
         SecretKey secretKeyPBKDF2 = Tools.getSecretKeyPBKDF2("1234".toCharArray(), salt2, Tools.PBKDF2_ITERATION);
         byte[] output2 = Cipher.cipher(secretKeyPBKDF2, test.getBytes(StandardCharsets.UTF_8));
 
@@ -208,12 +218,15 @@ public class MainTest {
     @Test
     public void testAll() throws GeneralSecurityException, IOException {
         //Create MyState
-        MyState myStateUser1 = MyState.load();
+        String hashedPassword = Tools.hashPassword("1234");
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.generateRandomBytes(32), 1024);
+        MyState myStateUser1 = MyState.load(secretKey, hashedPassword);
 
         myStateUser1.incrementMyNonce();
         myStateUser1.save();
 
-        MyState myStateFile = MyState.load();
+        SecretKey newSecretKey = Tools.loadSecretKey(hashedPassword);
+        MyState myStateFile = MyState.load(newSecretKey, hashedPassword);
 
         assertArrayEquals(myStateUser1.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myStateUser1.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());

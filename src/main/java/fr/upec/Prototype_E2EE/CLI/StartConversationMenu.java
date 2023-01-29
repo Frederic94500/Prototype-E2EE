@@ -99,7 +99,6 @@ public class StartConversationMenu implements InterfaceCLI {
             if (name != null) {
                 System.out.println();
                 myState.addAConversation(message2);
-                myState.save();
 
                 System.out.println("Conversation with " + name + " has been created!\n");
             }

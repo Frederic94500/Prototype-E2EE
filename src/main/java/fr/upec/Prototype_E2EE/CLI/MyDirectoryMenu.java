@@ -3,8 +3,6 @@ package fr.upec.Prototype_E2EE.CLI;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Tools;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
 /**
@@ -33,10 +31,8 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
-     * @throws IOException              Throws IOException if there is an I/O exception
-     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private void addPerson(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
+    private void addPerson(Scanner scanner, MyState myState) {
         String name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
         if (!name.equals("0")) {
             String input;
@@ -55,7 +51,6 @@ public class MyDirectoryMenu implements InterfaceCLI {
             if (!input.equals("0") && !pubKey.equals("")) {
                 byte[] pubKeyByte = Tools.toBytes(pubKey);
                 myState.getMyDirectory().addPerson(name, pubKeyByte);
-                myState.save();
                 System.out.println("\nThe person has been added!");
             }
         }
@@ -68,10 +63,8 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User information
-     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
-     * @throws IOException              Throws IOException if there is an I/O exception
      */
-    private void deletePerson(Scanner scanner, MyState myState) throws GeneralSecurityException, IOException {
+    private void deletePerson(Scanner scanner, MyState myState) {
         if (myState.getMyDirectory().sizeOfDirectory() == 0) {
             System.out.println("\nNothing to delete!\n");
         } else {
@@ -85,7 +78,6 @@ public class MyDirectoryMenu implements InterfaceCLI {
             } while (!myState.getMyDirectory().isInDirectory(input));
             if (!input.equals("0")) {
                 myState.getMyDirectory().deletePerson(input);
-                myState.save();
                 System.out.println("The person " + input + " has been deleted!");
             }
         }
@@ -96,11 +88,9 @@ public class MyDirectoryMenu implements InterfaceCLI {
      *
      * @param scanner Scanner user input
      * @param myState User Information
-     * @throws IOException              Throws IOException if there is an I/O exception
-     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     @Override
-    public void menu(Scanner scanner, MyState myState) throws IOException, GeneralSecurityException {
+    public void menu(Scanner scanner, MyState myState) {
         boolean cli = true;
         int input;
 
