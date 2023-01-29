@@ -131,7 +131,7 @@ public class MainTest {
         myState.save();
 
         SecretKey newSecretKey = Tools.loadSecretKey(hashedPassword);
-        MyState myStateFile = MyState.load(newSecretKey, hashedPassword);
+        MyState myStateFile = MyState.load(hashedPassword, newSecretKey);
 
         assertArrayEquals(myState.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myState.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());
@@ -174,7 +174,7 @@ public class MainTest {
         myState.save();
 
         SecretKey secretKey = Tools.loadSecretKey(hashedPassword);
-        MyState myStateFile = MyState.load(secretKey, hashedPassword);
+        MyState myStateFile = MyState.load(hashedPassword, secretKey);
         String digestFile = Tools.digest(MyKeyPair.FILENAME);
 
         myState.replaceMyKeyPair();
@@ -220,13 +220,13 @@ public class MainTest {
         //Create MyState
         String hashedPassword = Tools.hashPassword("1234");
         SecretKey secretKey = Tools.getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.generateRandomBytes(32), 1024);
-        MyState myStateUser1 = MyState.load(secretKey, hashedPassword);
+        MyState myStateUser1 = MyState.load(hashedPassword, secretKey);
 
         myStateUser1.incrementMyNonce();
         myStateUser1.save();
 
         SecretKey newSecretKey = Tools.loadSecretKey(hashedPassword);
-        MyState myStateFile = MyState.load(newSecretKey, hashedPassword);
+        MyState myStateFile = MyState.load(hashedPassword, newSecretKey);
 
         assertArrayEquals(myStateUser1.getMyPublicKey().getEncoded(), myStateFile.getMyPublicKey().getEncoded());
         assertArrayEquals(myStateUser1.getMyPrivateKey().getEncoded(), myStateFile.getMyPrivateKey().getEncoded());

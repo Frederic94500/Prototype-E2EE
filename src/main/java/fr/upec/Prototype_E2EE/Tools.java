@@ -20,9 +20,7 @@ import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
 
 import static java.util.Arrays.copyOfRange;
 
@@ -278,11 +276,11 @@ public class Tools {
         String password;
         String confirmPassword;
         do {
-            password = getInput("Create the password: ");
+            password = getInput("Create the password (0 = quit): ");
             if (password.equals("0")) {
                 System.exit(0);
             }
-            confirmPassword = getInput("Confirm the password: ");
+            confirmPassword = getInput("Confirm the password (0 = quit): ");
             if (confirmPassword.equals("0")) {
                 System.exit(0);
             }
@@ -309,31 +307,33 @@ public class Tools {
     }
 
     /**
-     * Get the correct password
+     * Get the correct password and SecretKey
      *
-     * @return Return a hashed password
+     * @return Return a hashed password and SecretKey
      * @throws FileNotFoundException    Throws FileNotFoundException if there file is not found
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static String getPassword() throws FileNotFoundException, GeneralSecurityException {
+    public static Map.Entry<String, SecretKey> getPassAndSecret() throws FileNotFoundException, GeneralSecurityException {
+        HashMap<String, SecretKey> output = new HashMap<>();
         Scanner scanner = new Scanner(new File(MyState.FILENAME));
         String data = scanner.nextLine();
         String[] rawData = data.split(",");
 
-        String password;
+        String hashedPassword;
         SecretKey secretKey;
         boolean cli = true;
         do {
-            password = getInput("Type your password: ");
-            if (password.equals("0")) {
+            hashedPassword = hashPassword(getInput("Type your password (0 = quit): "));
+            if (hashedPassword.equals("0")) {
                 System.exit(0);
             }
-            secretKey = getSecretKeyPBKDF2(password.toCharArray(), Tools.toBytes(rawData[4]));
+            secretKey = getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.toBytes(rawData[4]));
             if (testSecretKey(secretKey)) {
+                output.put(hashedPassword, secretKey);
                 cli = false;
             }
         } while (cli);
-        return hashPassword(password);
+        return output.entrySet().iterator().next();
     }
 
     /**
@@ -350,7 +350,6 @@ public class Tools {
         } catch (GeneralSecurityException e) {
             return false;
         }
-
         return true;
     }
 

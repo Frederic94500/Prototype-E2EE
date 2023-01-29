@@ -66,7 +66,7 @@ public class MyState {
      * @throws IOException              Throws IOException if there is an I/O exception
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static MyState load(SecretKey secretKey, String hashedPassword) throws IOException, GeneralSecurityException {
+    public static MyState load(String hashedPassword, SecretKey secretKey) throws IOException, GeneralSecurityException {
         if (Tools.isFileExists(FILENAME)) {
             Scanner scanner = new Scanner(new File(FILENAME));
             String data = scanner.nextLine();

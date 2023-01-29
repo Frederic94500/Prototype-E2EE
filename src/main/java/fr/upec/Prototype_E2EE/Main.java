@@ -7,6 +7,7 @@ import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -31,14 +32,13 @@ public class Main {
                                                __/ | |                                    \s
                                               |___/|_|                                    \s""");
         MyState myState = null;
-        SecretKey secretKey;
+        Map.Entry<String, SecretKey> tuple;
         String hashedPassword;
         if (Tools.isFileExists(MyState.FILENAME)) {
             do {
-                hashedPassword = Tools.getPassword();
-                secretKey = Tools.loadSecretKey(hashedPassword);
+                tuple = Tools.getPassAndSecret();
                 try {
-                    myState = MyState.load(secretKey, hashedPassword);
+                    myState = MyState.load(tuple.getKey(), tuple.getValue());
                 } catch (AEADBadTagException e) {
                     System.out.println("Wrong password! Please retry!");
                 }
