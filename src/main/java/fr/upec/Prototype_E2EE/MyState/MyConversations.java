@@ -5,14 +5,12 @@ import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.SecretKey;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +33,7 @@ public class MyConversations {
      *
      * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
-    public MyConversations(SecretKey secretKey) throws FileNotFoundException, GeneralSecurityException {
+    public MyConversations(SecretKey secretKey) throws IOException, GeneralSecurityException {
         this.myConversations = load(secretKey);
     }
 
@@ -45,15 +43,14 @@ public class MyConversations {
      * @return Return an ArrayList of SecretBuild
      * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
-    public List<SecretBuild> load(SecretKey secretKey) throws FileNotFoundException, GeneralSecurityException {
+    public List<SecretBuild> load(SecretKey secretKey) throws IOException, GeneralSecurityException {
         ArrayList<SecretBuild> myConversations = new ArrayList<>();
         if (Tools.isFileExists(FILENAME)) {
-            Scanner scanner = new Scanner(new File(FILENAME));
-            if (scanner.hasNextLine()) {
-                String data = scanner.nextLine();
-                scanner.close();
-                String output = new String(Cipher.decipher(secretKey, Tools.toBytes(data)));
-                String[] rawConversations = output.split(",");
+            byte[] cipheredData = Tools.readFile(FILENAME);
+            if (cipheredData.length != 0) {
+                byte[] rawData = Cipher.decipher(secretKey, cipheredData);
+
+                String[] rawConversations = new String(rawData).split(",");
                 for (String rawConversation : rawConversations) {
                     String[] splitConversation = rawConversation.split(":");
                     myConversations.add(new SecretBuild(new String(Tools.toBytes(splitConversation[0])), Tools.toBytes(splitConversation[1])));

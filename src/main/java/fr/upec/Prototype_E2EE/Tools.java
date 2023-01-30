@@ -11,7 +11,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -313,7 +313,7 @@ public class Tools {
      * @throws FileNotFoundException    Throws FileNotFoundException if there file is not found
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static Map.Entry<String, SecretKey> getPassAndSecret() throws FileNotFoundException, GeneralSecurityException {
+    public static Map.Entry<String, SecretKey> getPassAndSecret() throws GeneralSecurityException, IOException {
         HashMap<String, SecretKey> output = new HashMap<>();
         Scanner scanner = new Scanner(new File(MyState.FILENAME));
         String data = scanner.nextLine();
@@ -341,12 +341,10 @@ public class Tools {
      *
      * @param secretKey SecretKey PBKDF2
      * @return Return a boolean if the SecretKey is correct
-     * @throws FileNotFoundException Throws FileNotFoundException if there file is not found
      */
-    public static Boolean testSecretKey(SecretKey secretKey) throws FileNotFoundException {
+    public static Boolean testSecretKey(SecretKey secretKey) throws IOException {
         try {
-            Scanner scanner = new Scanner(new File(MyKeyPair.FILENAME));
-            Cipher.cipher(secretKey, Tools.toBytes(scanner.nextLine()));
+            Cipher.decipher(secretKey, Tools.readFile(MyKeyPair.FILENAME));
         } catch (GeneralSecurityException e) {
             return false;
         }
@@ -448,8 +446,19 @@ public class Tools {
         if (!isFileExists(filename)) {
             createFile(filename);
         }
-        FileWriter writer = new FileWriter(filename);
-        writer.write(toBase64(input));
-        writer.close();
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filename)) {
+            fileOutputStream.write(input);
+        }
+    }
+
+    /**
+     * Read a file
+     *
+     * @param filename Filename
+     * @return Return Bytes from file
+     * @throws IOException Throws IOException if there is an I/O exception
+     */
+    public static byte[] readFile(String filename) throws IOException {
+        return Files.readAllBytes(new File(filename).toPath());
     }
 }

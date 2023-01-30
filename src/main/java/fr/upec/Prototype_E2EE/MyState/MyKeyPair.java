@@ -5,11 +5,9 @@ import fr.upec.Prototype_E2EE.Protocol.Keys;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.SecretKey;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Scanner;
 
 /**
  * Store the PublicKey and the PrivateKey of the user
@@ -56,10 +54,7 @@ public class MyKeyPair {
      */
     public static MyKeyPair load(SecretKey secretKey) throws GeneralSecurityException, IOException {
         if (Tools.isFileExists(FILENAME)) {
-            Scanner scanner = new Scanner(new File(FILENAME));
-            String data = scanner.nextLine();
-            scanner.close();
-            String output = new String(Cipher.decipher(secretKey, Tools.toBytes(data)));
+            String output = new String(Cipher.decipher(secretKey, Tools.readFile(FILENAME)));
             String[] dataBase64 = output.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {

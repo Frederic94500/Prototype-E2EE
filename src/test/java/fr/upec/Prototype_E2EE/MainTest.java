@@ -152,7 +152,7 @@ public class MainTest {
         myDirectory.addPerson("user2", user2.getMyPublicKey().getEncoded());
         assertEquals(2, myDirectory.sizeOfDirectory());
 
-        myDirectory.saveIntoFile(secretKey);
+        myDirectory.saveFile(secretKey);
         MyDirectory myDirectoryFile = new MyDirectory(secretKey);
 
         assertTrue(myDirectory.isInDirectory(user1.getMyPublicKey().getEncoded()));
@@ -160,7 +160,7 @@ public class MainTest {
 
         myDirectory.deletePerson("user2");
         assertEquals(1, myDirectory.sizeOfDirectory());
-        myDirectory.saveIntoFile(secretKey);
+        myDirectory.saveFile(secretKey);
 
         MyDirectory myDirectoryFile2 = new MyDirectory(secretKey);
         assertEquals(1, myDirectoryFile2.sizeOfDirectory());

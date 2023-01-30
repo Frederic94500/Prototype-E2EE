@@ -175,7 +175,7 @@ public class MyState {
         SecretKey secretKey = Tools.getSecretKeyPBKDF2(hashedPassword.toCharArray(), salt);
 
         myKeyPair.save(secretKey);
-        myDirectory.saveIntoFile(secretKey);
+        myDirectory.saveFile(secretKey);
         myConversations.save(secretKey);
         String checksumMyKeyPair = Tools.digest(MyKeyPair.FILENAME);
         String checksumMyDirectory = Tools.digest(MyDirectory.FILENAME);
