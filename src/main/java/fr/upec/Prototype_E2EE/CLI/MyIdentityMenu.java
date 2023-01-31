@@ -63,15 +63,18 @@ public class MyIdentityMenu implements InterfaceCLI {
                     ========== My Identity Menu ==========
                     | 0 - Return back
                     | 1 - Show my Identity
-                    | 2 - Replace my Identity
+                    | 2 - Export Private key
+                    | 3 - Replace my Identity
                     ======================================""");
-            input = Tools.getInput(scanner, 2);
+            input = Tools.getInput(scanner, 3);
 
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
                 showMyPubKey(myState.getMyPublicKey());
             } else if (input == 2) {
+                System.out.println(myState.exportToJSON());
+            } else if (input == 3) {
                 replaceMyIdentityMenu(scanner, myState);
             }
         } while (cli);

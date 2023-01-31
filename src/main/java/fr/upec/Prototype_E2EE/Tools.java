@@ -123,6 +123,17 @@ public class Tools {
     }
 
     /**
+     * Create a new SecretKey PBKDF2 for the first time open
+     *
+     * @return Return SecretKey PBKDF2
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public static SecretKey getSecretKeyPBKDF2(String hashedPassword) throws GeneralSecurityException {
+        byte[] salt = generateRandomBytes(32);
+        return getSecretKeyPBKDF2(hashedPassword.toCharArray(), salt);
+    }
+
+    /**
      * Generate a SecureRandom using AES(256)
      *
      * @return Return a SecureRandom
@@ -253,17 +264,6 @@ public class Tools {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    /**
-     * Create a new SecretKey PBKDF2 for the first time open
-     *
-     * @return Return SecretKey PBKDF2
-     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
-     */
-    public static SecretKey createSecretKey(String hashedPassword) throws GeneralSecurityException {
-        byte[] salt = generateRandomBytes(32);
-        return getSecretKeyPBKDF2(hashedPassword.toCharArray(), salt);
     }
 
     /**

@@ -1,5 +1,8 @@
 package fr.upec.Prototype_E2EE;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fr.upec.Prototype_E2EE.MyState.MyConversations;
 import fr.upec.Prototype_E2EE.MyState.MyDirectory;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
@@ -13,8 +16,13 @@ import org.junit.Test;
 import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.*;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -193,6 +201,75 @@ public class MainTest {
         assertEquals("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==", pubKey);
         assertEquals("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECdQQzt/cpVAylBBPo4qw6dwVU17vNy5ZQG9QJqUwZnnC4yMjdrFC0MIvPgGxA/p1yOLPbSXnQZKEak27u9OEZg==", reTestPubKey);
         assertThrows(IllegalArgumentException.class, () -> Tools.keyParser(wrongPubKey));
+    }
+
+    @Test
+    public void testJWK() throws GeneralSecurityException {
+        String jwk = "{\"nonce\":\"yzcHGSJ388h5/6Mct0OR3swFGT6R9NrI3xDs6arV9UE=\",\"wkey\":\"9DG/Lo4kH6ckJNUoOlpJe2YnPEVOmujnAPMCuF22zBVs+CheQwuAU3bTaOedkCuw1x4CtSnX2Tes21pnav4KR0/KYDs8u/6B3DlnKoyOo0w/98vIGvifLHi6fB8tm1e40aXBmjk51LYBdCEecfy/hkOHJFSwYUqFT4aeH542GGnVxHB2fu7S/HTrkntXj30gdStYmAPj+bHdHBGFdRUpUCb7rboyCGt2607kDVqbqONUFzwtC2vDu7MX4GdE8qDdeqMoP8XGAygQ+QeFjZX/IZNZTwMKYw3RIwZN/2Px\",\"iterations\":1000000,\"iv\":\"rh++GLYnLzQppaUgCZKPr9Lcp8EWm6ZEka5dCqo74Jg=\"}";
+
+        JsonElement jsonElement = JsonParser.parseString(jwk);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        String nonce = jsonObject.get("nonce").getAsString();
+        String wkey = jsonObject.get("wkey").getAsString();
+        int iterations = jsonObject.get("iterations").getAsInt();
+        String iv = jsonObject.get("iv").getAsString();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Tools.toBytes(iv).length + Tools.toBytes(wkey).length);
+        byteBuffer.put(Tools.toBytes(iv));
+        byteBuffer.put(Tools.toBytes(wkey));
+
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2("0000".toCharArray(), Tools.toBytes(nonce), iterations);
+
+        byte[] output = Cipher.decipher(secretKey, byteBuffer.array());
+
+        System.out.println(new String(output));
+
+        JsonElement jsonElement1 = JsonParser.parseString(new String(output));
+        JsonObject jsonObject1 = jsonElement1.getAsJsonObject();
+
+        BigInteger p = new BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853951");
+        ECFieldFp field = new ECFieldFp(p);
+        BigInteger a = new BigInteger("115792089210356248762697446949407573530086143415290314195533631308867097853948");
+        BigInteger b = new BigInteger("41058363725152142129326129780047268409114441015993725554835256314039467401291");
+        BigInteger n = new BigInteger("115792089210356248762697446949407573529996955224135760342422259061068512044369");
+        int h = 1;
+        EllipticCurve curve = new EllipticCurve(field, a, b);
+
+        ECPoint ecPoint = new ECPoint(new BigInteger(Tools.toBytes(jsonObject1.get("x").getAsString())), new BigInteger(Tools.toBytes(jsonObject1.get("y").getAsString())));
+
+        ECParameterSpec ecParameterSpec = new ECParameterSpec(curve, ecPoint, n, h);
+
+        ECPublicKeySpec keySpec = new ECPublicKeySpec(ecPoint, ecParameterSpec);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+        System.out.println(Tools.toBase64(publicKey.getEncoded()));
+    }
+
+    @Test
+    public void testJWK2() throws GeneralSecurityException {
+        MyKeyPair myKeyPair = new MyKeyPair();
+        String outputJson = myKeyPair.exportToJSON(Tools.hashPassword("0000"));
+
+        System.out.println(outputJson);
+
+        JsonElement jsonElement = JsonParser.parseString(outputJson);
+        JsonObject jsonObject = jsonElement.getAsJsonObject();
+        String nonce = jsonObject.get("nonce").getAsString();
+        String wkey = jsonObject.get("wkey").getAsString();
+        int iterations = jsonObject.get("iterations").getAsInt();
+        String iv = jsonObject.get("iv").getAsString();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Tools.toBytes(iv).length + Tools.toBytes(wkey).length);
+        byteBuffer.put(Tools.toBytes(iv));
+        byteBuffer.put(Tools.toBytes(wkey));
+
+        SecretKey secretKey = Tools.getSecretKeyPBKDF2(Tools.hashPassword("0000").toCharArray(), Tools.toBytes(nonce), iterations);
+
+        byte[] output = Cipher.decipher(secretKey, byteBuffer.array());
+
+        System.out.println(new String(output));
     }
 
     @Test

@@ -219,4 +219,13 @@ public class MyState {
         this.myKeyPair = new MyKeyPair();
         this.save();
     }
+
+    /**
+     * Export PrivateKey to JSON for JS version
+     * <pre>Contains nonce (salt), wkey, iterations, iv
+     * See <a href="https://upec.ovh/e2ee.html">JS version</a></pre>
+     */
+    public String exportToJSON() throws GeneralSecurityException {
+        return myKeyPair.exportToJSON(hashedPassword);
+    }
 }

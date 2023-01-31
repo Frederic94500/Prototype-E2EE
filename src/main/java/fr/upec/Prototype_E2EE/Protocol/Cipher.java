@@ -15,7 +15,7 @@ public class Cipher {
     /**
      * Galois Counter Mode IV
      */
-    public static final int GCM_IV_LENGTH = 12;
+    public static final int GCM_IV_LENGTH = 32;
     /**
      * Galois Counter Mode Tag
      */
