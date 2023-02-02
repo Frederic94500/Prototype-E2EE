@@ -25,11 +25,11 @@ public class KeyExchange {
      * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
-    public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static byte[] hkdfExtract(byte[] salt, byte[] ikm) throws NoSuchAlgorithmException, InvalidKeyException {
+        SecretKey secretKey = new SecretKeySpec(salt, "HmacSHA512");
         Mac mac = Mac.getInstance("HmacSHA512");
-        mac.init(ikm);
-        mac.update(salt);
-        return mac.doFinal();
+        mac.init(secretKey);
+        return mac.doFinal(ikm);
     }
 
 
@@ -100,7 +100,7 @@ public class KeyExchange {
         byte[] keyAgreed = keyAgreement.generateSecret();
         SecretKey symKey = new SecretKeySpec(keyAgreed, "ECDH");
 
-        byte[] hkdfExtract = hkdfExtract(salt, symKey);
+        byte[] hkdfExtract = hkdfExtract(salt, symKey.getEncoded());
         byte[] hkdfExpand = hkdfExpand(hkdfExtract, info, 32);
 
         return new SecretKeySpec(hkdfExpand, "AES");

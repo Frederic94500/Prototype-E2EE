@@ -240,6 +240,17 @@ public class Tools {
     }
 
     /**
+     * Hash input
+     *
+     * @param input Input
+     * @return Return hashed input
+     * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
+     */
+    public static byte[] digest(byte[] input) throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance("SHA-512").digest(input);
+    }
+
+    /**
      * Hashing the password
      *
      * @param password Password
@@ -324,7 +335,7 @@ public class Tools {
         boolean cli = true;
         do {
             hashedPassword = hashPassword(getInput("Type your password (0 = quit): "));
-            if (hashedPassword.equals("0")) {
+            if (hashedPassword.equals(hashPassword("0"))) {
                 System.exit(0);
             }
             secretKey = getSecretKeyPBKDF2(hashedPassword.toCharArray(), Tools.toBytes(rawData[4]));

@@ -1,6 +1,7 @@
 package fr.upec.Prototype_E2EE.Protocol;
 
 import fr.upec.Prototype_E2EE.MyState.MyDirectory;
+import fr.upec.Prototype_E2EE.Tools;
 
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
@@ -43,13 +44,14 @@ public class Communication {
         byte[] otherPubKeyByte = copyOfRange(otherMessage1Bytes, 72, 192);
 
         byte[] xor = new byte[64];
-        byte[] myNonce = myMessage1.getNonce();
+        byte[] myDigestNonce = Tools.digest(myMessage1.getNonce());
+        byte[] otherDigestNonce = Tools.digest(otherNonce);
         for (int i = 0; i < 64; i++) {
-            xor[i] = (byte) (myNonce[i] ^ otherNonce[i]);
+            xor[i] = (byte) (myDigestNonce[i] ^ otherDigestNonce[i]);
         }
 
         PublicKey otherPubKey = toPublicKey(otherPubKeyByte);
-        byte[] symKey = KeyExchange.createSharedKey(myMessage1.getPrivateKey(), otherPubKey, xor, "Shinzou o Sasageyo!").getEncoded();
+        byte[] symKey = KeyExchange.createSharedKey(myMessage1.getPrivateKey(), otherPubKey, xor, "brenski").getEncoded();
 
         return new SecretBuild(myMessage1.getTimestamp(),
                 otherTimestamp,
