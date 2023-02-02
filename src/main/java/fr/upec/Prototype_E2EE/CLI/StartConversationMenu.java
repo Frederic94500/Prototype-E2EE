@@ -74,7 +74,7 @@ public class StartConversationMenu implements InterfaceCLI {
                 } catch (NoSuchElementException e) {
                     System.out.println(e.getMessage());
                 } catch (Exception e) {
-                    System.out.println("This is not the expected Message 2!");
+                    System.out.println("This is not the expected Message 2! " + e);
                 }
             }
         } while (pass == null);

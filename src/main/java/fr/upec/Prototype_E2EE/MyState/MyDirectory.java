@@ -4,11 +4,13 @@ import fr.upec.Prototype_E2EE.Protocol.Cipher;
 import fr.upec.Prototype_E2EE.Protocol.Sign;
 import fr.upec.Prototype_E2EE.Tools;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -185,8 +187,13 @@ public class MyDirectory {
     public String getSigner(byte[] signedMessage, String expectedMessage2) throws GeneralSecurityException {
         for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
             PublicKey otherPublicKey = Tools.toPublicKey(entry.getValue());
-            if (Sign.verify(otherPublicKey, signedMessage, expectedMessage2)) {
-                return entry.getKey();
+            try {
+                if (Sign.verify(otherPublicKey, signedMessage, expectedMessage2)) {
+                    return entry.getKey();
+                }
+            } catch (AEADBadTagException ignored) {
+            } catch (SignatureException e) {
+                System.out.println(e.getMessage());
             }
         }
         throw new NoSuchElementException("Unknown sender!");
