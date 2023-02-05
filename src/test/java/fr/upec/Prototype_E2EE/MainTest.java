@@ -96,11 +96,11 @@ public class MainTest {
     @Test
     public void testSigningVerifying() throws GeneralSecurityException {
         String textString = "Around the World, Around the World";
-        byte[] signatureUser1 = Sign.sign(user1.getMyPrivateKey(), textString);
+        byte[] signatureUser1 = Sign.sign(user1.getMyPrivateKey(), textString.getBytes(StandardCharsets.UTF_8));
         String signatureBase64User1 = Tools.toBase64(signatureUser1);
 
         byte[] signatureFromUser1 = Tools.toBytes(signatureBase64User1);
-        assertTrue(Sign.verify(user1.getMyPublicKey(), signatureFromUser1, textString));
+        assertTrue(Sign.verify(user1.getMyPublicKey(), signatureFromUser1, textString.getBytes(StandardCharsets.UTF_8)));
     }
 
     @Test

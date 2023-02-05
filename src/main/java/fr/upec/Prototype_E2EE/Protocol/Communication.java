@@ -71,7 +71,7 @@ public class Communication {
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
     public static String createMessage2(PrivateKey myPrivateKey, SecretBuild mySecretBuild) throws GeneralSecurityException {
-        String message2Base64 = toBase64(mySecretBuild.toBytesWithoutSymKey());
+        byte[] message2Base64 = mySecretBuild.toBytesWithoutSymKey();
 
         //Need to have an ID verification in Android
         byte[] signedMessage = Sign.sign(myPrivateKey, message2Base64);
@@ -91,8 +91,7 @@ public class Communication {
      */
     public static String handleMessage2(MyDirectory myDirectory, SecretBuild mySecretBuild, String otherMessage2) throws GeneralSecurityException {
         SecretBuild otherSecretBuild = new SecretBuild(mySecretBuild); //Swap information without symKey
-        byte[] otherSecretBuildBytes = otherSecretBuild.toBytesWithoutSymKey();
-        String expectedMessage2 = toBase64(otherSecretBuildBytes);
+        byte[] expectedMessage2 = otherSecretBuild.toBytesWithoutSymKey();
 
         byte[] cipheredSignedOtherMessage2 = toBytes(otherMessage2);
         byte[] signedMessage = Cipher.decipher(toSecretKey(mySecretBuild.getSymKey()), cipheredSignedOtherMessage2);

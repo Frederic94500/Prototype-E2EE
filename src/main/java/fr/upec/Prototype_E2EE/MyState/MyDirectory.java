@@ -184,16 +184,14 @@ public class MyDirectory {
      * @return Return the name of the signer or null if not found
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public String getSigner(byte[] signedMessage, String expectedMessage2) throws GeneralSecurityException {
+    public String getSigner(byte[] signedMessage, byte[] expectedMessage2) throws GeneralSecurityException {
         for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
             PublicKey otherPublicKey = Tools.toPublicKey(entry.getValue());
             try {
                 if (Sign.verify(otherPublicKey, signedMessage, expectedMessage2)) {
                     return entry.getKey();
                 }
-            } catch (AEADBadTagException ignored) {
-            } catch (SignatureException e) {
-                System.out.println(e.getMessage());
+            } catch (AEADBadTagException | SignatureException ignored) {
             }
         }
         throw new NoSuchElementException("Unknown sender!");

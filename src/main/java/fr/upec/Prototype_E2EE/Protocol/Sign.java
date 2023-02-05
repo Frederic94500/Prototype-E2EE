@@ -1,6 +1,5 @@
 package fr.upec.Prototype_E2EE.Protocol;
 
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -14,17 +13,16 @@ public class Sign {
      * Sign a message using SHA512-ECDSA
      *
      * @param privateKey Your Private Key
-     * @param message    Your Message
+     * @param input      Your Message
      * @return Return a signed message
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static byte[] sign(PrivateKey privateKey, String message) throws GeneralSecurityException {
-        Signature signature = Signature.getInstance("SHA512withECDSA");
+    public static byte[] sign(PrivateKey privateKey, byte[] input) throws GeneralSecurityException {
+        Signature signature = Signature.getInstance("SHA512withECDSAinP1363Format");
         //Need to have an ID verification in Android
         signature.initSign(privateKey);
 
-        byte[] messageByte = message.getBytes(StandardCharsets.UTF_8);
-        signature.update(messageByte);
+        signature.update(input);
 
         return signature.sign();
     }
@@ -32,17 +30,17 @@ public class Sign {
     /**
      * Verify a signed message using SHA512-ECDSA
      *
-     * @param publicKey     Other Public Key
-     * @param signedMessage The signed message
-     * @param message       The message
+     * @param publicKey       Other Public Key
+     * @param signedMessage   The signed message
+     * @param expectedMessage The expected message
      * @return Return a boolean if the message come from the other
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    public static Boolean verify(PublicKey publicKey, byte[] signedMessage, String message) throws GeneralSecurityException {
-        Signature signature = Signature.getInstance("SHA512withECDSA");
+    public static Boolean verify(PublicKey publicKey, byte[] signedMessage, byte[] expectedMessage) throws GeneralSecurityException {
+        Signature signature = Signature.getInstance("SHA512withECDSAinP1363Format");
         signature.initVerify(publicKey);
 
-        signature.update(message.getBytes(StandardCharsets.UTF_8));
+        signature.update(expectedMessage);
 
         return signature.verify(signedMessage);
     }
