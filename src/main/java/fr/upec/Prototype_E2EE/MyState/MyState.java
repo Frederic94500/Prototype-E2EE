@@ -4,15 +4,13 @@ import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Scanner;
 
 /**
  * Contain user state
@@ -68,9 +66,7 @@ public class MyState {
      */
     public static MyState load(String hashedPassword, SecretKey secretKey) throws IOException, GeneralSecurityException {
         if (Tools.isFileExists(FILENAME)) {
-            Scanner scanner = new Scanner(new File(FILENAME));
-            String data = scanner.nextLine();
-            scanner.close();
+            String data = new String(Tools.readFile(MyState.FILENAME));
             String[] rawData = data.split(",");
             if (isEqualsDigest(rawData)) {
                 return new MyState(MyKeyPair.load(secretKey),
@@ -183,12 +179,7 @@ public class MyState {
         String myNonceBase64 = Tools.toBase64(ByteBuffer.allocate(4).putInt(myNonce).array());
         String saltBase64 = Tools.toBase64(salt);
 
-        if (!Tools.isFileExists(FILENAME)) {
-            Tools.createFile(FILENAME);
-        }
-        FileWriter writer = new FileWriter(FILENAME);
-        writer.write(checksumMyKeyPair + "," + checksumMyDirectory + "," + checksumMyConversations + "," + myNonceBase64 + "," + saltBase64);
-        writer.close();
+        Tools.writeToFile(MyState.FILENAME, (checksumMyKeyPair + "," + checksumMyDirectory + "," + checksumMyConversations + "," + myNonceBase64 + "," + saltBase64).getBytes(StandardCharsets.UTF_8));
     }
 
     /**
