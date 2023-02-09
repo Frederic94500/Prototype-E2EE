@@ -1,6 +1,6 @@
 package fr.upec.Prototype_E2EE.MyState;
 
-import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
+import fr.upec.Prototype_E2EE.Protocol.Conversation;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.SecretKey;
@@ -185,10 +185,10 @@ public class MyState {
     /**
      * Add a new conversation to the list of conversations
      *
-     * @param secretBuild SecretBuild from the new conversation
+     * @param conversation SecretBuild from the new conversation
      */
-    public void addAConversation(SecretBuild secretBuild) {
-        myConversations.addConversation(secretBuild);
+    public void addAConversation(Conversation conversation) {
+        myConversations.addConversation(conversation);
     }
 
     /**

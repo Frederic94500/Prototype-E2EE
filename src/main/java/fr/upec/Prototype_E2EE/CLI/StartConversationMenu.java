@@ -2,6 +2,7 @@ package fr.upec.Prototype_E2EE.CLI;
 
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.Communication;
+import fr.upec.Prototype_E2EE.Protocol.Conversation;
 import fr.upec.Prototype_E2EE.Protocol.Message1;
 import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
 import fr.upec.Prototype_E2EE.Tools;
@@ -57,13 +58,13 @@ public class StartConversationMenu implements InterfaceCLI {
      * @return Return a boolean if it is correct
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private String message2Menu(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
+    private Conversation message2Menu(Scanner scanner, MyState myState, SecretBuild mySecretBuild) throws GeneralSecurityException {
         String myMessage2 = Communication.createMessage2(myState.getMyPrivateKey(), mySecretBuild);
         System.out.println("Please copy the Message 2 and transfer to your recipient: ");
         System.out.println(myMessage2 + "\n");
 
         String input;
-        String pass = null;
+        Conversation pass = null;
         do {
             input = Tools.getInput(scanner, "Please paste the Message 2 from your sender (0 = return back): \n");
             if (input.equals("0")) {
@@ -95,12 +96,12 @@ public class StartConversationMenu implements InterfaceCLI {
         SecretBuild message2 = message1Menu(scanner, myState);
         if (message2 != null) {
             System.out.println();
-            String name = message2Menu(scanner, myState, message2);
-            if (name != null) {
+            Conversation conversation = message2Menu(scanner, myState, message2);
+            if (conversation != null) {
                 System.out.println();
-                myState.addAConversation(message2);
+                myState.addAConversation(conversation);
 
-                System.out.println("Conversation with " + name + " has been created!\n");
+                System.out.println("Conversation with " + conversation.getName() + " has been created!\n");
             }
         }
     }

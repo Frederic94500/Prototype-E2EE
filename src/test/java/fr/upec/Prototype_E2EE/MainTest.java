@@ -89,8 +89,11 @@ public class MainTest {
         String message2User1 = Communication.createMessage2(user1.getMyPrivateKey(), secretBuildUser1);
         String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
-        assertEquals("user1", Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1));
-        assertEquals("user2", Communication.handleMessage2(user1.getMyDirectory(), secretBuildUser1, message2User2));
+        Conversation conversationUser1 = Communication.handleMessage2(user1.getMyDirectory(), secretBuildUser1, message2User2);
+        Conversation conversationUser2 = Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1);
+
+        assertEquals("user1", conversationUser2.getName());
+        assertEquals("user2", conversationUser1.getName());
     }
 
     @Test
@@ -249,12 +252,15 @@ public class MainTest {
         String message2User1 = Communication.createMessage2(myStateUser1.getMyPrivateKey(), secretBuildUser1);
         String message2User2 = Communication.createMessage2(user2.getMyPrivateKey(), secretBuildUser2);
 
-        assertEquals("user1", Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1));
-        assertEquals("user2", Communication.handleMessage2(myStateUser1.getMyDirectory(), secretBuildUser1, message2User2));
+        Conversation conversationUser1 = Communication.handleMessage2(myStateUser1.getMyDirectory(), secretBuildUser1, message2User2);
+        Conversation conversationUser2 = Communication.handleMessage2(user2.getMyDirectory(), secretBuildUser2, message2User1);
+
+        assertEquals("user2", conversationUser1.getName());
+        assertEquals("user1", conversationUser2.getName());
         //End create Conversation
 
         //Add Conversation to MyState
-        myStateUser1.addAConversation(secretBuildUser1);
+        myStateUser1.addAConversation(conversationUser1);
         myStateUser1.incrementMyNonce();
         myStateUser1.save();
 
@@ -264,7 +270,7 @@ public class MainTest {
 
         //Test cipher/decipher message
         String textString = "Another bites the dust";
-        byte[] cipheredTextUser1 = Cipher.cipher(Tools.toSecretKey(myConversationsUser1.getConversation(0).getSymKey()), textString.getBytes(StandardCharsets.UTF_8));
+        byte[] cipheredTextUser1 = Cipher.cipher(Tools.toSecretKey(myConversationsUser1.getConversation(0).getSecretKey()), textString.getBytes(StandardCharsets.UTF_8));
         String cipheredTextBase64User1 = Tools.toBase64(cipheredTextUser1);
 
         byte[] cipheredTextFromUser1 = Tools.toBytes(cipheredTextBase64User1);

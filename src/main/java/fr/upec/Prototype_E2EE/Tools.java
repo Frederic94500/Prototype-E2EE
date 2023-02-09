@@ -1,5 +1,7 @@
 package fr.upec.Prototype_E2EE;
 
+import fr.upec.Prototype_E2EE.MyState.MyConversations;
+import fr.upec.Prototype_E2EE.MyState.MyDirectory;
 import fr.upec.Prototype_E2EE.MyState.MyKeyPair;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.Cipher;
@@ -177,17 +179,19 @@ public class Tools {
         return bb.getLong();
     }
 
+    public static Long bytesToLong(byte[] input) {
+        return toLong(input, 0, 8);
+    }
+
     /**
-     * Transform Bytes to int from byte[]
+     * Convert Long to Bytes
      *
-     * @param tab  byte[] source
-     * @param from Start index
-     * @param to   End index
-     * @return Return an int
+     * @param input Long input
+     * @return Return byte[]
      */
-    public static int toInteger(byte[] tab, int from, int to) {
-        ByteBuffer bb = ByteBuffer.wrap(copyOfRange(tab, from, to));
-        return bb.getInt();
+    public static byte[] longToByteArray(long input) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(8);
+        return byteBuffer.putLong(input).array();
     }
 
     /**
@@ -471,5 +475,14 @@ public class Tools {
      */
     public static byte[] readFile(String filename) throws IOException {
         return Files.readAllBytes(new File(filename).toPath());
+    }
+
+    /**
+     * Verify if all files are present
+     *
+     * @return Return a boolean if all files are present
+     */
+    public static boolean isAllFilesPresent() {
+        return isFileExists(MyKeyPair.FILENAME) && isFileExists(MyDirectory.FILENAME) && isFileExists(MyConversations.FILENAME);
     }
 }

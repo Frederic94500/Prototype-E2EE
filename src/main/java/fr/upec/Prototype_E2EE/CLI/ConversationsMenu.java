@@ -3,7 +3,7 @@ package fr.upec.Prototype_E2EE.CLI;
 import fr.upec.Prototype_E2EE.MyState.MyConversations;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 import fr.upec.Prototype_E2EE.Protocol.Cipher;
-import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
+import fr.upec.Prototype_E2EE.Protocol.Conversation;
 import fr.upec.Prototype_E2EE.Tools;
 
 import javax.crypto.AEADBadTagException;
@@ -22,10 +22,10 @@ public class ConversationsMenu implements InterfaceCLI {
      *
      * @param scanner         User input
      * @param myConversations All User conversations
-     * @param secretBuild     The chosen conversation
+     * @param conversation    The chosen conversation
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private void conversationMenu(Scanner scanner, MyConversations myConversations, SecretBuild secretBuild) throws GeneralSecurityException {
+    private void conversationMenu(Scanner scanner, MyConversations myConversations, Conversation conversation) throws GeneralSecurityException {
         boolean cli = true;
         int input;
 
@@ -42,11 +42,11 @@ public class ConversationsMenu implements InterfaceCLI {
             if (input == 0) {
                 cli = false;
             } else if (input == 1) {
-                cipherMenu(secretBuild);
+                cipherMenu(conversation);
             } else if (input == 2) {
-                decipherMenu(scanner, secretBuild);
+                decipherMenu(scanner, conversation);
             } else if (input == 3) {
-                myConversations.deleteConversation(secretBuild);
+                myConversations.deleteConversation(conversation);
                 System.out.println("This conversation has been deleted!\n");
                 cli = false;
             }
@@ -56,13 +56,13 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Cipher a message
      *
-     * @param secretBuild A conversation
+     * @param conversation A conversation
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private void cipherMenu(SecretBuild secretBuild) throws GeneralSecurityException {
+    private void cipherMenu(Conversation conversation) throws GeneralSecurityException {
         boolean cli = true;
         String input;
-        SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
+        SecretKey secretKey = Tools.toSecretKey(conversation.getSecretKey());
 
         do {
             input = Tools.getInput("Please type your message to cipher (0 = return back):\n");
@@ -79,14 +79,14 @@ public class ConversationsMenu implements InterfaceCLI {
     /**
      * Decipher a message
      *
-     * @param scanner     User input
-     * @param secretBuild A conversation
+     * @param scanner      User input
+     * @param conversation A conversation
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      */
-    private void decipherMenu(Scanner scanner, SecretBuild secretBuild) throws GeneralSecurityException {
+    private void decipherMenu(Scanner scanner, Conversation conversation) throws GeneralSecurityException {
         boolean cli = true;
         String input;
-        SecretKey secretKey = Tools.toSecretKey(secretBuild.getSymKey());
+        SecretKey secretKey = Tools.toSecretKey(conversation.getSecretKey());
 
         do {
             try {
@@ -126,8 +126,8 @@ public class ConversationsMenu implements InterfaceCLI {
             } else {
                 sb.append("===== Please choose a conversation =====\n");
                 for (int i = 0; i < myConversations.getSize(); i++) {
-                    SecretBuild conversation = myConversations.getConversation(i);
-                    Date date = new Date(conversation.getMyDate() * 1000L);
+                    Conversation conversation = myConversations.getConversation(i);
+                    Date date = new Date(conversation.getDate() * 1000L);
                     String name = myConversations.getConversation(i).getName();
                     sb.append("| ")
                             .append(i + 1)

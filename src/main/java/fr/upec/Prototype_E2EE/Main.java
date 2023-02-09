@@ -35,6 +35,10 @@ public class Main {
         Map.Entry<String, SecretKey> tuple;
         String hashedPassword;
         if (Tools.isFileExists(MyState.FILENAME)) {
+            if (!Tools.isAllFilesPresent()) {
+                System.out.println("ERROR!!! Missing .MyDirectory or .MyKeyPair or .MyConversations to continue! Please delete .MyState");
+                System.exit(1);
+            }
             do {
                 tuple = Tools.getPassAndSecret();
                 try {
