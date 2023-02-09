@@ -44,7 +44,7 @@ public class MyDirectoryMenu implements InterfaceCLI {
             String input;
             String pubKey = "";
             do {
-                input = Tools.getInput("Public Key of the person (0 = return back): ");
+                input = Tools.getInput("Public Key of the person (Does not manage multiline!)(0 = return back): ");
                 if (input.equals("0")) {
                     break;
                 } else {
