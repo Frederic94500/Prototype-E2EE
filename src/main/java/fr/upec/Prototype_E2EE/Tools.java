@@ -167,7 +167,7 @@ public class Tools {
     }
 
     /**
-     * Transform Bytes to Long from byte[]
+     * Transform Bytes to Long
      *
      * @param tab  byte[] source
      * @param from Start index
@@ -179,6 +179,12 @@ public class Tools {
         return bb.getLong();
     }
 
+    /**
+     * Transform Bytes to Long
+     *
+     * @param input byte[] input
+     * @return Return a Long
+     */
     public static Long bytesToLong(byte[] input) {
         return toLong(input, 0, 8);
     }
