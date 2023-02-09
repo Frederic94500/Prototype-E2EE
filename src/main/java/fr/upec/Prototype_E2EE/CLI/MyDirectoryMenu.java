@@ -33,7 +33,13 @@ public class MyDirectoryMenu implements InterfaceCLI {
      * @param myState User information
      */
     private void addPerson(Scanner scanner, MyState myState) {
-        String name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
+        String name;
+        do {
+            name = Tools.getInput(scanner, "Name of the person (0 = return back): ");
+            if (myState.getMyDirectory().isInDirectory(name)) {
+                System.out.println("Already a key with this name!");
+            }
+        } while (myState.getMyDirectory().isInDirectory(name));
         if (!name.equals("0")) {
             String input;
             String pubKey = "";
