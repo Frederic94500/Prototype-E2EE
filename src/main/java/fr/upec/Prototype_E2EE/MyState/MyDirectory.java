@@ -1,11 +1,21 @@
 package fr.upec.Prototype_E2EE.MyState;
 
+import fr.upec.Prototype_E2EE.Protocol.Cipher;
+import fr.upec.Prototype_E2EE.Protocol.Sign;
 import fr.upec.Prototype_E2EE.Tools;
 
-import java.io.*;
+import javax.crypto.AEADBadTagException;
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * MyDirectory contains a list of persons
@@ -14,16 +24,20 @@ public class MyDirectory {
     /**
      * Filename
      */
-    public final static String filename = ".MyDirectory";
+    public final static String FILENAME = ".MyDirectory";
     private final HashMap<String, byte[]> directory;
+
+    public MyDirectory() {
+        this.directory = new HashMap<>();
+    }
 
     /**
      * Constructor MyDirectory
      *
      * @throws IOException Throws IOException if there is an I/O exception
      */
-    public MyDirectory() throws IOException {
-        this.directory = readFile();
+    public MyDirectory(SecretKey secretKey) throws IOException, GeneralSecurityException {
+        this.directory = readFile(secretKey);
     }
 
     /**
@@ -32,20 +46,19 @@ public class MyDirectory {
      * @return Return HashMap
      * @throws IOException Throws IOException if there is an I/O exception
      */
-    public HashMap<String, byte[]> readFile() throws IOException {
+    public HashMap<String, byte[]> readFile(SecretKey secretKey) throws IOException, GeneralSecurityException {
         HashMap<String, byte[]> map = new HashMap<>();
-        if (!Tools.isFileExists(filename)) {
-            Tools.createFile(filename);
-        }
-        File file = new File(filename);
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] tab = line.split(":");
-                String decodedName = new String(Tools.toBytes(tab[0]));
-                byte[] decodedPubKey = Tools.toBytes(tab[1]);
 
-                map.put(decodedName, decodedPubKey);
+        if (Tools.isFileExists(FILENAME)) {
+            byte[] cipheredData = Tools.readFile(FILENAME);
+            if (cipheredData.length != 0) {
+                byte[] rawData = Cipher.decipher(secretKey, cipheredData);
+                String[] users = new String(rawData).split(",");
+
+                for (String user : users) {
+                    String[] userInfo = user.split(":");
+                    map.put(new String(Tools.toBytes(userInfo[0])), Tools.toBytes(userInfo[1]));
+                }
             }
         }
         return map;
@@ -56,30 +69,18 @@ public class MyDirectory {
      *
      * @throws IOException Throws IOException if there is an I/O exception
      */
-    public void saveIntoFile() throws IOException {
-        if (!Tools.isFileExists(filename)) {
-            Tools.createFile(filename);
-        }
-        writeToFile();
-    }
+    public void saveFile(SecretKey secretKey) throws IOException, GeneralSecurityException {
+        String output = directory.entrySet().stream()
+                .map(user -> Tools.toBase64(user.getKey().getBytes(StandardCharsets.UTF_8)) + ":" + Tools.toBase64(user.getValue()))
+                .collect(Collectors.joining(","));
 
-    /**
-     * Write MyDirectory to a file
-     *
-     * @throws IOException Throws IOException if there is an I/O exception
-     */
-    private void writeToFile() throws IOException {
-        FileWriter fw = new FileWriter(filename);
-        BufferedWriter bw = new BufferedWriter(fw);
-        for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
-            String encodedNameString = Tools.toBase64(entry.getKey().getBytes());
-            String encodedPubKey = Tools.toBase64(entry.getValue());
-
-            bw.write(encodedNameString + ":" + encodedPubKey);
-            bw.newLine();
+        if (directory.size() > 0) {
+            byte[] cipheredDirectory = Cipher.cipher(secretKey, output.getBytes(StandardCharsets.UTF_8));
+            Tools.writeToFile(FILENAME, cipheredDirectory);
+        } else {
+            Tools.deleteFile(FILENAME);
+            Tools.createFile(FILENAME);
         }
-        bw.close();
-        fw.close();
     }
 
     /**
@@ -173,5 +174,26 @@ public class MyDirectory {
             }
         }
         return null;
+    }
+
+    /**
+     * Get the user who signed the message
+     *
+     * @param signedMessage    Signed message
+     * @param expectedMessage2 Expected Message 2
+     * @return Return the name of the signer or null if not found
+     * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
+     */
+    public String getSigner(byte[] signedMessage, byte[] expectedMessage2) throws GeneralSecurityException {
+        for (Map.Entry<String, byte[]> entry : directory.entrySet()) {
+            PublicKey otherPublicKey = Tools.toPublicKey(entry.getValue());
+            try {
+                if (Sign.verify(otherPublicKey, signedMessage, expectedMessage2)) {
+                    return entry.getKey();
+                }
+            } catch (AEADBadTagException | SignatureException ignored) {
+            }
+        }
+        throw new NoSuchElementException("Unknown sender!");
     }
 }

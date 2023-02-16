@@ -1,15 +1,16 @@
 package fr.upec.Prototype_E2EE.MyState;
 
-import fr.upec.Prototype_E2EE.Protocol.SecretBuild;
+import fr.upec.Prototype_E2EE.Protocol.Cipher;
+import fr.upec.Prototype_E2EE.Protocol.Conversation;
 import fr.upec.Prototype_E2EE.Tools;
 
-import java.io.File;
+import javax.crypto.SecretKey;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
@@ -20,16 +21,20 @@ public class MyConversations {
     /**
      * Filename
      */
-    public static final String filename = ".MyConversations";
-    private final List<SecretBuild> myConversations;
+    public static final String FILENAME = ".MyConversations";
+    private final List<Conversation> myConversations;
+
+    public MyConversations() {
+        this.myConversations = new ArrayList<>();
+    }
 
     /**
      * Constructor for MyConversations
      *
      * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
-    public MyConversations() throws FileNotFoundException {
-        this.myConversations = load();
+    public MyConversations(SecretKey secretKey) throws IOException, GeneralSecurityException {
+        this.myConversations = load(secretKey);
     }
 
     /**
@@ -38,16 +43,19 @@ public class MyConversations {
      * @return Return an ArrayList of SecretBuild
      * @throws FileNotFoundException Throws FileNotFoundException if the file was not found
      */
-    public List<SecretBuild> load() throws FileNotFoundException {
-        ArrayList<SecretBuild> myConversations = new ArrayList<>();
-        if (Tools.isFileExists(filename)) {
-            Scanner scanner = new Scanner(new File(filename));
-            if (scanner.hasNextLine()) {
-                String data = scanner.nextLine();
-                scanner.close();
-                String[] rawConversations = data.split(",");
+    public List<Conversation> load(SecretKey secretKey) throws IOException, GeneralSecurityException {
+        ArrayList<Conversation> myConversations = new ArrayList<>();
+        if (Tools.isFileExists(FILENAME)) {
+            byte[] cipheredData = Tools.readFile(FILENAME);
+            if (cipheredData.length != 0) {
+                byte[] rawData = Cipher.decipher(secretKey, cipheredData);
+
+                String[] rawConversations = new String(rawData).split(",");
                 for (String rawConversation : rawConversations) {
-                    myConversations.add(new SecretBuild(Tools.toBytes(rawConversation)));
+                    String[] splitConversation = rawConversation.split(":");
+                    myConversations.add(new Conversation(new String(Tools.toBytes(splitConversation[0])),
+                            Tools.bytesToLong(Tools.toBytes(splitConversation[1])),
+                            Tools.toBytes(splitConversation[2])));
                 }
             }
         }
@@ -59,17 +67,20 @@ public class MyConversations {
      *
      * @throws IOException Throws IOException if there is an I/O exception
      */
-    public void save() throws IOException {
+    public void save(SecretKey secretKey) throws IOException, GeneralSecurityException {
         String rawConversations = myConversations.stream()
-                .map(secretBuild -> Tools.toBase64(secretBuild.toBytesWithSymKey()))
+                .map(conversation -> Tools.toBase64(conversation.getName().getBytes(StandardCharsets.UTF_8)) + ":" +
+                        Tools.toBase64(Tools.longToByteArray(conversation.getDate())) + ":" +
+                        Tools.toBase64(conversation.getSecretKey()))
                 .collect(Collectors.joining(","));
 
-        if (!Tools.isFileExists(filename)) {
-            Tools.createFile(filename);
+        if (myConversations.size() > 0) {
+            byte[] cipheredOutput = Cipher.cipher(secretKey, rawConversations.getBytes(StandardCharsets.UTF_8));
+            Tools.writeToFile(FILENAME, cipheredOutput);
+        } else {
+            Tools.deleteFile(FILENAME);
+            Tools.createFile(FILENAME);
         }
-        FileWriter writer = new FileWriter(filename);
-        writer.write(rawConversations);
-        writer.close();
     }
 
     /**
@@ -84,10 +95,10 @@ public class MyConversations {
     /**
      * Add a new conversation to the list of conversations
      *
-     * @param secretBuild SecretBuild to be added
+     * @param conversation Conversation to be added
      */
-    public void addConversation(SecretBuild secretBuild) {
-        myConversations.add(secretBuild);
+    public void addConversation(Conversation conversation) {
+        myConversations.add(conversation);
     }
 
     /**
@@ -96,16 +107,16 @@ public class MyConversations {
      * @param index Index of the conversation
      * @return Return a conversation (as SecretBuild)
      */
-    public SecretBuild getConversation(int index) {
+    public Conversation getConversation(int index) {
         return myConversations.get(index);
     }
 
     /**
      * Delete a conversation
      *
-     * @param secretBuild Conversation (as SecretBuild) to be deleted
+     * @param conversation Conversation (as SecretBuild) to be deleted
      */
-    public void deleteConversation(SecretBuild secretBuild) {
-        myConversations.remove(secretBuild);
+    public void deleteConversation(Conversation conversation) {
+        myConversations.remove(conversation);
     }
 }

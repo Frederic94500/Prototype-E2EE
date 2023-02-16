@@ -3,8 +3,11 @@ package fr.upec.Prototype_E2EE;
 import fr.upec.Prototype_E2EE.CLI.MainMenu;
 import fr.upec.Prototype_E2EE.MyState.MyState;
 
+import javax.crypto.AEADBadTagException;
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -28,7 +31,26 @@ public class Main {
                 |_|   |_|  \\___/ \\__\\___/ \\__|\\__, | .__/ \\___| |______|____|______|______|
                                                __/ | |                                    \s
                                               |___/|_|                                    \s""");
-        MyState myState = MyState.load();
+        MyState myState = null;
+        Map.Entry<String, SecretKey> tuple;
+        String hashedPassword;
+        if (Tools.isFileExists(MyState.FILENAME)) {
+            if (!Tools.isAllFilesPresent()) {
+                System.out.println("ERROR!!! Missing .MyDirectory or .MyKeyPair or .MyConversations to continue! Please delete .MyState");
+                System.exit(1);
+            }
+            do {
+                tuple = Tools.getPassAndSecret();
+                try {
+                    myState = MyState.load(tuple.getKey(), tuple.getValue());
+                } catch (AEADBadTagException e) {
+                    System.out.println("Wrong password! Please retry!");
+                }
+            } while (myState == null);
+        } else {
+            hashedPassword = Tools.getConfirmPassword();
+            myState = new MyState(hashedPassword);
+        }
         new MainMenu().menu(new Scanner(System.in), myState);
 
         myState.save();

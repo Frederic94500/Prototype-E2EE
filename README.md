@@ -1,10 +1,12 @@
 # Prototype Application E2EE
 
-Prototype Application E2EE sous Java
+Prototype Application E2EE sous Java.
 
 Version minimum de Java: 15
 
-Ce prototype nécessite l'utilisation de Maven
+Ce prototype nécessite l'utilisation de Maven.
+
+Compatible avec la version Javascript disponible [ici](https://upec.ovh/e2ee.html).
 
 ## Compilation, Tests, Paquet et Javadoc
 
@@ -12,7 +14,7 @@ Ce prototype nécessite l'utilisation de Maven
 
 ## Exécution
 
-`java -jar target/E2EE-0.2.2.jar`
+`java -jar target/E2EE-0.3.jar`
 
 ## Compilation
 

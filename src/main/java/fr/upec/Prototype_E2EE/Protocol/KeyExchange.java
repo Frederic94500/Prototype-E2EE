@@ -25,11 +25,11 @@ public class KeyExchange {
      * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
-    public static byte[] hkdfExtract(byte[] salt, SecretKey ikm) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static byte[] hkdfExtract(byte[] salt, byte[] ikm) throws NoSuchAlgorithmException, InvalidKeyException {
+        SecretKey secretKey = new SecretKeySpec(salt, "HmacSHA512");
         Mac mac = Mac.getInstance("HmacSHA512");
-        mac.init(ikm);
-        mac.update(salt);
-        return mac.doFinal();
+        mac.init(secretKey);
+        return mac.doFinal(ikm);
     }
 
 
@@ -87,23 +87,20 @@ public class KeyExchange {
      *
      * @param privateKey     Your Private Key
      * @param publicKeyOther Public Key of the other person
-     * @param myNonce        My nonce
-     * @param otherNonce     Other nonce
+     * @param salt           Salt (xor)
      * @param info           Info
      * @return Return the shared key
      * @throws NoSuchAlgorithmException Throws NoSuchAlgorithmException if there is not the expected algorithm
      * @throws InvalidKeyException      Throws InvalidKeyException if there is an invalid key
      */
-    public static SecretKey createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, int myNonce, int otherNonce, String info) throws NoSuchAlgorithmException, InvalidKeyException {
+    public static SecretKey createSharedKey(PrivateKey privateKey, PublicKey publicKeyOther, byte[] salt, String info) throws NoSuchAlgorithmException, InvalidKeyException {
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(publicKeyOther, true);
         byte[] keyAgreed = keyAgreement.generateSecret();
         SecretKey symKey = new SecretKeySpec(keyAgreed, "ECDH");
 
-        int xor = myNonce ^ otherNonce;
-
-        byte[] hkdfExtract = hkdfExtract(ByteBuffer.allocate(4).putInt(xor).array(), symKey);
+        byte[] hkdfExtract = hkdfExtract(salt, symKey.getEncoded());
         byte[] hkdfExpand = hkdfExpand(hkdfExtract, info, 32);
 
         return new SecretKeySpec(hkdfExpand, "AES");

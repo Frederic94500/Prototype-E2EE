@@ -1,13 +1,13 @@
 package fr.upec.Prototype_E2EE.MyState;
 
+import fr.upec.Prototype_E2EE.Protocol.Cipher;
 import fr.upec.Prototype_E2EE.Protocol.Keys;
 import fr.upec.Prototype_E2EE.Tools;
 
-import java.io.File;
-import java.io.FileWriter;
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.util.Scanner;
 
 /**
  * Store the PublicKey and the PrivateKey of the user
@@ -17,7 +17,7 @@ public class MyKeyPair {
     /**
      * Filename
      */
-    public static final String filename = ".MyKeyPair";
+    public static final String FILENAME = ".MyKeyPair";
     private final PublicKey myPublicKey;
     private final PrivateKey myPrivateKey;
 
@@ -52,12 +52,10 @@ public class MyKeyPair {
      * @throws GeneralSecurityException Throws GeneralSecurityException if there is a security-related exception
      * @throws IOException              Throws IOException if there is an I/O exception
      */
-    public static MyKeyPair load() throws GeneralSecurityException, IOException {
-        if (Tools.isFileExists(filename)) {
-            Scanner scanner = new Scanner(new File(filename));
-            String data = scanner.nextLine();
-            scanner.close();
-            String[] dataBase64 = data.split(",");
+    public static MyKeyPair load(SecretKey secretKey) throws GeneralSecurityException, IOException {
+        if (Tools.isFileExists(FILENAME)) {
+            String output = new String(Cipher.decipher(secretKey, Tools.readFile(FILENAME)));
+            String[] dataBase64 = output.split(",");
             return new MyKeyPair(Tools.toBytes(dataBase64[0]), Tools.toBytes(dataBase64[1]));
         } else {
             return new MyKeyPair();
@@ -87,14 +85,13 @@ public class MyKeyPair {
      *
      * @throws IOException Throws IOException if there is an I/O exception
      */
-    public void save() throws IOException {
+    public void save(SecretKey secretKey) throws IOException, GeneralSecurityException {
         String myPublicKeyBase64 = Tools.toBase64(myPublicKey.getEncoded());
         String myPrivateKeyBase64 = Tools.toBase64(myPrivateKey.getEncoded());
-        if (!Tools.isFileExists(filename)) {
-            Tools.createFile(filename);
-        }
-        FileWriter writer = new FileWriter(filename);
-        writer.write(myPublicKeyBase64 + "," + myPrivateKeyBase64);
-        writer.close();
+        String input = myPublicKeyBase64 + "," + myPrivateKeyBase64;
+
+        byte[] cipheredOutput = Cipher.cipher(secretKey, input.getBytes(StandardCharsets.UTF_8));
+
+        Tools.writeToFile(FILENAME, cipheredOutput);
     }
 }
